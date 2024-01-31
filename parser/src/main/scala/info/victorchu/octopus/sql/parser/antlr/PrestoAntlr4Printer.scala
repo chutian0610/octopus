@@ -20,7 +20,7 @@ class PrestoAntlr4Printer extends PrestoBaseVisitor[String]{
   }
 
   private def logTrace(node: RuleNode): Unit = {
-    PrestoAntlr4Printer.logger.info(getLogPrefix(node.getRuleContext) + node.getClass.getSimpleName + "||" + node.getText)
+    PrestoAntlr4Printer.logger.debug(getLogPrefix(node.getRuleContext) + node.getClass.getSimpleName + "||" + node.getText)
   }
 
   override def visitTerminal(node: TerminalNode): String = node.getText

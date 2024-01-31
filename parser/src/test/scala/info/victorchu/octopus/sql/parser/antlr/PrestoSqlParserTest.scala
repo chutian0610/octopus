@@ -1,5 +1,7 @@
 package info.victorchu.octopus.sql.parser.antlr
 
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.Assertions._
 class PrestoSqlParserTest extends AnyWordSpec {
 
   "PrestoSqlParser" should {
@@ -10,6 +12,7 @@ class PrestoSqlParserTest extends AnyWordSpec {
           | ORDER  BY productid
           | LIMIT  3""".stripMargin
       val statement = PrestoSqlParser().createStatement(sql, PrestoParsingOptions(PrestoParsingOptions.DecimalLiteralTreatment.AS_DOUBLE))
+      new PrestoAntlr4Printer().visit(statement)
     }
   }
 }

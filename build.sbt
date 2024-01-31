@@ -26,6 +26,7 @@ lazy val parser = (project in file("parser"))
       ,dependencies.antlr4
       ,dependencies.guava
       ,dependencies.scalaLogging
+      ,dependencies.slf4jSimple
 
     )
   )
@@ -36,6 +37,7 @@ lazy val dependencies = new {
   val scalaLoggingVersion = "3.9.4"
   val antlr4Version = "4.13.1"
   val guavaVersion = "22.0"
+  val slf4jSimpleVersion = "1.7.30"
 
 
   val scalatest = "org.scalatest" %% "scalatest" % scalatestVersion % "test"
@@ -45,6 +47,7 @@ lazy val dependencies = new {
   // not scala based lib
   val antlr4 = "org.antlr" % "antlr4-runtime" % antlr4Version
   val guava ="com.google.guava" % "guava" % guavaVersion
+  val slf4jSimple = "org.slf4j" % "slf4j-simple" % slf4jSimpleVersion % "test"
 
 
 }
