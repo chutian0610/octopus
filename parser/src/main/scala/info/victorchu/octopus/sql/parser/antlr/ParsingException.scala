@@ -7,7 +7,7 @@ class ParsingException(message: String, cause: RecognitionException, val line: I
     this(message, null, 1, 0)
   }
 
-  def this(message: String, nodeLocation: NodeLocation)={
+  def this(message: String, nodeLocation: GrammarNodeLocation)={
     this(message, null, nodeLocation.getLineNumber, nodeLocation.getColumnNumber)
   }
 
