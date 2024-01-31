@@ -16,6 +16,8 @@ lazy val parser = (project in file("parser"))
   .settings(
     name := "parser",
     settings,
+    Antlr4 / antlr4GenVisitor := true,
+    Antlr4 / antlr4GenListener := true,
     Antlr4 / antlr4Version := "4.13.1",
     Antlr4 / antlr4PackageName := Some ("info.victorchu.octopus.sql.parser.antlr"),
     libraryDependencies ++= Seq (

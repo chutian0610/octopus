@@ -11,6 +11,10 @@ import java.util.function.Function
 import scala.jdk.CollectionConverters.*
 
 object PrestoSqlParser {
+
+  def apply():PrestoSqlParser={
+    new PrestoSqlParser(PrestoSqlParserOption())
+  }
   private val LEXER_ERROR_LISTENER: BaseErrorListener = new BaseErrorListener() {
     override def syntaxError(recognizer: Recognizer[_, _], offendingSymbol: AnyRef, line: Int, charPositionInLine: Int, message: String, e: RecognitionException): Unit = {
       throw new ParsingException(message, e, line, charPositionInLine)
