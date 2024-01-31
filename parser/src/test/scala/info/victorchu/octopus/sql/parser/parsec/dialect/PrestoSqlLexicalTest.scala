@@ -15,7 +15,7 @@ class PrestoSqlLexicalTest extends AnyWordSpec {
     }
 
     "parse lower case identifier failure " in {
-      val f@Parsed.Failure(label, index, extra) = parse("a", PrestoSqlParser.identifier(_))
+      val f @ Parsed.Failure(label, index, extra) = parse("a", PrestoSqlParser.identifier(_))
       assert(label == "" && index == 0 && f.msg == """Position 1:1, found "a"""")
     }
 
