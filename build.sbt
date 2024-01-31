@@ -19,20 +19,32 @@ lazy val parser = (project in file("parser"))
     Antlr4 / antlr4Version := "4.13.1",
     Antlr4 / antlr4PackageName := Some ("info.victorchu.octopus.sql.parser.antlr"),
     libraryDependencies ++= Seq (
-      dependencies.fastparse
+       dependencies.fastparse
       ,dependencies.scalatest
+      ,dependencies.antlr4
+      ,dependencies.guava
+      ,dependencies.scalaLogging
+
     )
   )
 
 lazy val dependencies = new {
   val fastparseVersion = "3.0.2"
   val scalatestVersion = "3.2.17"
+  val scalaLoggingVersion = "3.9.4"
   val antlr4Version = "4.13.1"
+  val guavaVersion = "22.0"
 
 
   val scalatest = "org.scalatest" %% "scalatest" % scalatestVersion % "test"
   val fastparse = "com.lihaoyi" %% "fastparse" % fastparseVersion
-  val antlr4 = "org.antlr" % "antlr-runtime" % antlr4Version
+  val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
+
+  // not scala based lib
+  val antlr4 = "org.antlr" % "antlr4-runtime" % antlr4Version
+  val guava ="com.google.guava" % "guava" % guavaVersion
+
+
 }
 
 lazy val settings =
@@ -46,8 +58,7 @@ lazy val compilerOptions = Seq(
   "-feature",
   "-language:existentials",
   "-language:implicitConversions",
-  "-unchecked",
-  "-deprecation"
+  "-unchecked"
 
 )
 
