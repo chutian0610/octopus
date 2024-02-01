@@ -2,10 +2,10 @@
 
 ## env 
 
-- jdk17+
+- jdk 17+
+- scala 3.x 
+- sbt
 
-## test
+## ide
 
-```
-sbt test -Dorg.slf4j.simpleLogger.defaultLogLevel=debug
-```
+使用bsp方式导入IDEA，参考 [https://www.scala-sbt.org/1.x/docs/IDE.html](https://www.scala-sbt.org/1.x/docs/IDE.html)
