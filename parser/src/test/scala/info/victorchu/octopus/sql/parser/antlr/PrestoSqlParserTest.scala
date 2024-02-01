@@ -1,7 +1,8 @@
 package info.victorchu.octopus.sql.parser.antlr
 
+import info.victorchu.octopus.sql.parser.antlr.presto.{PrestoAntlr4Printer, PrestoParsingOptions, PrestoSqlParser}
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.Assertions._
+import org.scalatest.Assertions.*
 class PrestoSqlParserTest extends AnyWordSpec {
 
   "PrestoSqlParser" should {

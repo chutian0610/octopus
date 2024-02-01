@@ -1,4 +1,4 @@
-package info.victorchu.octopus.sql.parser.antlr
+package info.victorchu.octopus.sql.parser.antlr.presto
 
 import com.typesafe.scalalogging.Logger
 import info.victorchu.octopus.sql.parser.antlr.ErrorHandler.getClass

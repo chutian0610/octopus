@@ -1,6 +1,7 @@
-package info.victorchu.octopus.sql.parser.antlr
+package info.victorchu.octopus.sql.parser.antlr.presto
 
-import org.antlr.v4.runtime.{BaseErrorListener, CharStream, CharStreams, CommonToken, CommonTokenStream, DefaultErrorStrategy, InputMismatchException, Parser, ParserRuleContext, RecognitionException,Recognizer, Token, TokenSource}
+import info.victorchu.octopus.sql.parser.antlr.*
+import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.misc.{Pair, ParseCancellationException}
 import org.antlr.v4.runtime.tree.TerminalNode
