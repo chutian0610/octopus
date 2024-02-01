@@ -2,7 +2,7 @@ import sbt.{Def, *}
 import sbt.Keys.*
 import sbt.internal.io.Source
 
-import scala.sys.process.{Process, ProcessLogger}
+import scala.sys.process.Process
 
 object Antlr4Plugin extends AutoPlugin {
   object autoImport {
@@ -16,7 +16,7 @@ object Antlr4Plugin extends AutoPlugin {
     val antlr4GenVisitor = settingKey[Boolean]("Generate visitor")
     val antlr4TreatWarningsAsErrors = settingKey[Boolean]("Treat warnings as errors when generating parser")
   }
-  import autoImport._
+  import autoImport.*
 
   private val antlr4BuildDependency = settingKey[ModuleID]("Build dependency required for parsing grammars, scoped to plugin")
 
@@ -41,7 +41,7 @@ object Antlr4Plugin extends AutoPlugin {
           warningsAsErrorOpt = warningsAsErrorOpt
         )
     }
-    cachedCompile(((Antlr4 / sourceDirectory).value ** "*.g4").get.toSet).toSeq
+    cachedCompile(( ((Antlr4 / sourceDirectory).value ** "*.g4") ---((Antlr4 / sourceDirectory).value ** "imports" **"*.g4") ).get.toSet).toSeq
   }
 
   def runAntlr(
@@ -62,7 +62,7 @@ object Antlr4Plugin extends AutoPlugin {
       val packageArgs = packageName.map{_ +"."+ srcFile.getAbsoluteFile.getParent.split("/src/main/antlr4/").last.replaceAll("/",".")}.toSeq.flatMap{p => Seq("-package",p)}
       val outArgs = Seq("-o", Seq(targetDir,srcFile.getAbsoluteFile.getParent.split("/src/main/antlr4/").last).mkString("/"))
       val args = baseArgs ++ outArgs ++ packageArgs ++ listenerArgs ++ visitorArgs ++ warningAsErrorArgs ++ Seq(srcFile.toString)
-      log.info(args.mkString(","))
+      log.info(s"""call antlr4 ,args: ${args.mkString(" ")}""")
       val exitCode = Process("java", args) ! log
       if(exitCode != 0) sys.error(s"Antlr4 failed with exit code $exitCode")
     }
