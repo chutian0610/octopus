@@ -71,10 +71,6 @@ object Antlr4Plugin extends AutoPlugin {
     (targetDir ** "*.java").get.toSet
   }
 
-  /**
-   * 每个项目会触发
-   * @return
-   */
   override def projectSettings: Seq[Def.Setting[?]] = inConfig(Antlr4)(Seq(
     sourceDirectory := (Compile / sourceDirectory).value / "antlr4",
     javaSource := (Compile / sourceManaged).value / "java",

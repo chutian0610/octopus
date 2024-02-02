@@ -1,5 +1,5 @@
-import OctopusResolvers._
-import OctopusDependencies._
+import OctopusResolvers.*
+import OctopusDependencies.*
 
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "info.victorchu"
