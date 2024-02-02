@@ -1,6 +1,8 @@
 package info.victorchu.octopus.sql.parser.antlr.presto
 
+import info.victorchu.octopus.sql.parser.{SqlNodePosition, SqlParser, SqlParsingException}
 import info.victorchu.octopus.sql.parser.antlr.*
+import info.victorchu.octopus.sql.tree.SqlNode
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.misc.{Pair, ParseCancellationException}
@@ -18,10 +20,10 @@ object PrestoSqlParser {
   }
   private val LEXER_ERROR_LISTENER: BaseErrorListener = new BaseErrorListener() {
     override def syntaxError(recognizer: Recognizer[_, _], offendingSymbol: AnyRef, line: Int, charPositionInLine: Int, message: String, e: RecognitionException): Unit = {
-      throw new ParsingException(message, e, line, charPositionInLine)
+      throw new SqlParsingException(message, e, line, charPositionInLine)
     }
   }
-  private val PARSER_ERROR_HANDLER: ErrorHandler = ErrorHandler.builder
+  private val PARSER_ERROR_HANDLER: AntlrErrorHandler = AntlrErrorHandler.builder
           .specialRule(PrestoParser.RULE_expression, "<expression>")
           .specialRule(PrestoParser.RULE_booleanExpression, "<expression>")
           .specialRule(PrestoParser.RULE_valueExpression, "<expression>")
@@ -40,20 +42,20 @@ object PrestoSqlParser {
       val identifier: String = context.IDENTIFIER.getText
       for (symbol <- options.allowedIdentifierSymbols) {
         if (identifier.indexOf(symbol) >= 0) {
-          throw new ParsingException("identifiers must not contain '" + symbol + "'", null, context.IDENTIFIER.getSymbol.getLine, context.IDENTIFIER.getSymbol.getCharPositionInLine)
+          throw new SqlParsingException("identifiers must not contain '" + symbol + "'", SqlNodePosition(context.IDENTIFIER.getSymbol.getLine, context.IDENTIFIER.getSymbol.getCharPositionInLine))
         }
       }
     }
 
     override def exitBackQuotedIdentifier(context: PrestoParser.BackQuotedIdentifierContext): Unit = {
       val token: Token = context.BACKQUOTED_IDENTIFIER.getSymbol
-      throw new ParsingException("backquoted identifiers are not supported; use double quotes to quote identifiers", null, token.getLine, token.getCharPositionInLine)
+      throw new SqlParsingException("backquoted identifiers are not supported; use double quotes to quote identifiers", SqlNodePosition(token.getLine,token.getCharPositionInLine))
     }
 
     // 改造，支持数字开头标识符
     override def exitDigitIdentifier(context: PrestoParser.DigitIdentifierContext): Unit = {
       val token: Token = context.DIGIT_IDENTIFIER.getSymbol
-      throw new ParsingException("identifiers must not start with a digit; surround the identifier with double quotes", null, token.getLine, token.getCharPositionInLine);
+      throw new SqlParsingException("identifiers must not start with a digit; surround the identifier with double quotes",SqlNodePosition(token.getLine,token.getCharPositionInLine))
     }
 
     override def exitNonReserved(context: PrestoParser.NonReservedContext): Unit = {
@@ -71,14 +73,14 @@ object PrestoSqlParser {
   }
 }
 
-class PrestoSqlParser (options: PrestoSqlParserOption) {
+class PrestoSqlParser (options: PrestoSqlParserOption) extends SqlParser(options){
   requireNonNull(options, "options is null")
   val initializer:RefreshableParserInitializer = new RefreshableParserInitializer(()=>(new AntlrATNCacheFields(PrestoLexer._ATN),new AntlrATNCacheFields(PrestoParser._ATN)))
 
-  def createStatement(sql: String, parsingOptions: PrestoParsingOptions): ParserRuleContext = invokeParser("statement", sql,  x=>x.singleStatement(), parsingOptions)
-  def createExpression(expression: String, parsingOptions: PrestoParsingOptions): ParserRuleContext = invokeParser("expression", expression,  x=>x.standaloneExpression(), parsingOptions)
-  def createPathSpecification(expression: String): ParserRuleContext = invokeParser("path specification", expression, x=>x.standalonePathSpecification(), PrestoParsingOptions.apply())
-  private def invokeParser(name: String, sql: String, parseFunction: Function[PrestoParser, ParserRuleContext], prestoParsingOptions: PrestoParsingOptions): ParserRuleContext = try {
+  def createStatement(sql: String): ParserRuleContext = invokeParser("statement", sql,  x=>x.singleStatement())
+  def createExpression(expression: String): ParserRuleContext = invokeParser("expression", expression,  x=>x.standaloneExpression())
+  def createPathSpecification(expression: String): ParserRuleContext = invokeParser("path specification", expression, x=>x.standalonePathSpecification())
+  private def invokeParser(name: String, sql: String, parseFunction: Function[PrestoParser, ParserRuleContext]): ParserRuleContext = try {
     val lexer: PrestoLexer = new PrestoLexer(new CaseInsensitiveStream(CharStreams.fromString(sql)))
     val tokenStream: CommonTokenStream = new CommonTokenStream(lexer)
     val parser: PrestoParser = new PrestoParser(tokenStream)
@@ -112,7 +114,8 @@ class PrestoSqlParser (options: PrestoSqlParserOption) {
       case ex: ParseCancellationException =>
 
         // if we fail, parse with LL mode
-        tokenStream.reset() // rewind input stream
+        // rewind input stream
+        tokenStream.seek(0)
 
         parser.reset()
         parser.getInterpreter.setPredictionMode(PredictionMode.LL)
@@ -121,6 +124,10 @@ class PrestoSqlParser (options: PrestoSqlParserOption) {
     tree
   } catch {
     case e: StackOverflowError =>
-      throw new ParsingException(name + " is too large (stack overflow while parsing)")
+      throw new SqlParsingException(name + " is too large (stack overflow while parsing)")
+  }
+  override def parse(sql: String): Either[SqlNode, String] = {
+    createStatement(sql)
+    Right("TODO")
   }
 }

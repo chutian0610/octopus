@@ -4,7 +4,11 @@
 
 - jdk 17+
 - scala 3.x 
-- sbt
+- sbt 1.9.x
+
+## plugin
+
+- Antlr4Plugin: 根据g4文件生成antlr4 代码的插件
 
 ## ide
 

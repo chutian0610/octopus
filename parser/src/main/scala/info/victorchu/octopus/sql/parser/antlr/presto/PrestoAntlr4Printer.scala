@@ -1,7 +1,7 @@
 package info.victorchu.octopus.sql.parser.antlr.presto
 
 import com.typesafe.scalalogging.Logger
-import info.victorchu.octopus.sql.parser.antlr.ErrorHandler.getClass
+import info.victorchu.octopus.sql.parser.antlr.AntlrErrorHandler.getClass
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.{RuleNode, TerminalNode}
 object PrestoAntlr4Printer{

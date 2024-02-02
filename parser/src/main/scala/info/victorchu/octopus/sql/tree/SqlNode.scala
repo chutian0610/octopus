@@ -1,8 +1,8 @@
 package info.victorchu.octopus.sql.tree
 
-import info.victorchu.octopus.sql.SqlNodePosition
+import info.victorchu.octopus.sql.parser.SqlNodePosition
 
-/** SqlNode.
+/** root SqlNode.
   *
   * @author victor chu
   */

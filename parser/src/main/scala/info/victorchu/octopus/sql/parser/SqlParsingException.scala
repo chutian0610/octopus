@@ -1,13 +1,11 @@
-package info.victorchu.octopus.sql.parser.antlr
+package info.victorchu.octopus.sql.parser
 
-import org.antlr.v4.runtime.RecognitionException
-
-class ParsingException(message: String, cause: RecognitionException, val line: Int, val charPositionInLine: Int) extends RuntimeException(message, cause) {
+class SqlParsingException(message: String, cause: Throwable, val line: Int, val charPositionInLine: Int) extends RuntimeException(message, cause) {
   def this(message: String) = {
     this(message, null, 1, 0)
   }
 
-  def this(message: String, nodeLocation: GrammarNodeLocation)={
+  def this(message: String, nodeLocation: SqlNodePosition)={
     this(message, null, nodeLocation.getLineNumber, nodeLocation.getColumnNumber)
   }
 

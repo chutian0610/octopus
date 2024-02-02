@@ -60,9 +60,11 @@ object Antlr4Plugin extends AutoPlugin {
     val warningAsErrorArgs = if (warningsAsErrorOpt) Seq("-Werror") else Seq.empty
     for (srcFile <- srcFiles){
       val packageArgs = packageName.map{_ +"."+ srcFile.getAbsoluteFile.getParent.split("/src/main/antlr4/").last.replaceAll("/",".")}.toSeq.flatMap{p => Seq("-package",p)}
-      val outArgs = Seq("-o", Seq(targetDir,srcFile.getAbsoluteFile.getParent.split("/src/main/antlr4/").last).mkString("/"))
+      val output = Seq(targetDir, srcFile.getAbsoluteFile.getParent.split("/src/main/antlr4/").last).mkString("/")
+      val outArgs = Seq("-o", output )
       val args = baseArgs ++ outArgs ++ packageArgs ++ listenerArgs ++ visitorArgs ++ warningAsErrorArgs ++ Seq(srcFile.toString)
-      log.info(s"""call antlr4 ,args: ${args.mkString(" ")}""")
+      log.info(
+        s"""[Antlr4Plugin] call antlr4 Tool \n[Antlr4Plugin] |- g4 file: ${srcFile.toString} \n[Antlr4Plugin] |- output: $output""".stripMargin)
       val exitCode = Process("java", args) ! log
       if(exitCode != 0) sys.error(s"Antlr4 failed with exit code $exitCode")
     }

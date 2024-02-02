@@ -12,7 +12,7 @@ class PrestoSqlParserTest extends AnyWordSpec {
           | FROM   product
           | ORDER  BY productid
           | LIMIT  3""".stripMargin
-      val statement = PrestoSqlParser().createStatement(sql, PrestoParsingOptions(PrestoParsingOptions.DecimalLiteralTreatment.AS_DOUBLE))
+      val statement = PrestoSqlParser().createStatement(sql)
       new PrestoAntlr4Printer().visit(statement)
     }
   }

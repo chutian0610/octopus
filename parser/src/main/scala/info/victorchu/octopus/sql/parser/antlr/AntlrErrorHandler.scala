@@ -2,23 +2,24 @@ package info.victorchu.octopus.sql.parser.antlr
 
 import com.google.common.collect.HashMultimap
 import com.google.common.collect.Multimap
+import info.victorchu.octopus.sql.parser.SqlParsingException
 import org.antlr.v4.runtime.atn.ATNState.{BLOCK_START, RULE_START}
 import org.antlr.v4.runtime.atn.{ATN, ATNState, NotSetTransition, RuleStopState, RuleTransition, Transition, WildcardTransition}
 import org.antlr.v4.runtime.misc.IntervalSet
-import org.antlr.v4.runtime.{BaseErrorListener, NoViableAltException, Parser, RecognitionException,Recognizer, RuleContext, Token, TokenStream, Vocabulary}
+import org.antlr.v4.runtime.{BaseErrorListener, NoViableAltException, Parser, RecognitionException, Recognizer, RuleContext, Token, TokenStream, Vocabulary}
 
 import java.util
 import java.util.stream.Collectors
 import java.util.{ArrayDeque, Comparator, HashMap, HashSet, Map, Queue, Set}
 import scala.collection.mutable
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 /**
   * Antlr4 Default ErrorHandler
   */
-class ErrorHandler private(val specialRules: mutable.Map[Int, String] = mutable.Map(),
-                           val specialTokens: mutable.Map[Int, String] = mutable.Map(),
-                           val ignoredRules: mutable.Set[Int] = mutable.Set()
+class AntlrErrorHandler private(val specialRules: mutable.Map[Int, String] = mutable.Map(),
+                                val specialTokens: mutable.Map[Int, String] = mutable.Map(),
+                                val ignoredRules: mutable.Set[Int] = mutable.Set()
                           ) extends BaseErrorListener {
   override def syntaxError(recognizer: Recognizer[?, ?], offendingSymbol: AnyRef, line: Int, charPositionInLine: Int, message: String, e: RecognitionException): Unit = {
     var msg = message
@@ -41,27 +42,27 @@ class ErrorHandler private(val specialRules: mutable.Map[Int, String] = mutable.
         currentToken = parser.getCurrentToken
         context = parser.getContext
       }
-      val analyzer = new ErrorHandler.Analyzer(atn, parser.getVocabulary, specialRules, specialTokens, ignoredRules, parser.getTokenStream)
+      val analyzer = new AntlrErrorHandler.Analyzer(atn, parser.getVocabulary, specialRules, specialTokens, ignoredRules, parser.getTokenStream)
       val candidates = analyzer.process(currentState, currentToken.getTokenIndex, context)
       // pick the candidate tokens associated largest token index processed (i.e., the path that consumed the most input)
       val expected = candidates.asMap().asScala.toMap.maxBy((k,v)=>k)._2.asScala.toList.sorted.mkString(",")
       msg = s"mismatched input [${offendingSymbol.asInstanceOf[Token].getText}]. Expecting: ${expected}"
     } catch {
       case exception: Exception =>
-        ErrorHandler.logger.error("Unexpected failure when handling parsing error. This is likely a bug in the implementation",exception)
+        AntlrErrorHandler.logger.error("Unexpected failure when handling parsing error. This is likely a bug in the implementation",exception)
     }
-    throw new ParsingException(msg, e, line, charPositionInLine)
+    throw new SqlParsingException(msg, e, line, charPositionInLine)
   }
 }
 
-object ErrorHandler {
+object AntlrErrorHandler {
   import com.typesafe.scalalogging.Logger
   import scala.collection.mutable
   import scala.jdk.CollectionConverters._
   import scala.util.control.Breaks._
   private val logger = Logger(getClass.getName)
 
-  def builder: ErrorHandler.Builder = new ErrorHandler.Builder
+  def builder: AntlrErrorHandler.Builder = new AntlrErrorHandler.Builder
   class Analyzer(val atn: ATN,
                  val vocabulary: Vocabulary,
                  val specialRules: mutable.Map[Int, String],
@@ -70,9 +71,9 @@ object ErrorHandler {
                  val stream: TokenStream) {
 
     def process(currentState: ATNState, tokenIndex: Int, context: RuleContext): Multimap[Int, String] = {
-      process(new ErrorHandler.ParsingState(currentState, tokenIndex, makeCallStack(context)))
+      process(new AntlrErrorHandler.ParsingState(currentState, tokenIndex, makeCallStack(context)))
     }
-    def process(start: ErrorHandler.ParsingState): Multimap[Int, String] = {
+    def process(start: AntlrErrorHandler.ParsingState): Multimap[Int, String] = {
       val candidates: Multimap[Int, String] = HashMultimap.create
       // Simulates the ATN by consuming input tokens and walking transitions.
       // The ATN can be in multiple states (similar to an NFA)
@@ -172,7 +173,7 @@ object ErrorHandler {
       this
     }
 
-    def build: ErrorHandler = new ErrorHandler(specialRules, specialTokens, ignoredRules)
+    def build: AntlrErrorHandler = new AntlrErrorHandler(specialRules, specialTokens, ignoredRules)
   }
 
 }
