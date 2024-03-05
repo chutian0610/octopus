@@ -111,7 +111,7 @@ class PrestoSqlParser (options: PrestoSqlParserOption) extends SqlParser(options
       parser.getInterpreter.setPredictionMode(PredictionMode.SLL)
       tree = parseFunction.apply(parser)
     } catch {
-      case ex: ParseCancellationException =>
+      case _: ParseCancellationException =>
 
         // if we fail, parse with LL mode
         // rewind input stream
@@ -123,11 +123,12 @@ class PrestoSqlParser (options: PrestoSqlParserOption) extends SqlParser(options
     }
     tree
   } catch {
-    case e: StackOverflowError =>
+    case _: StackOverflowError =>
       throw new SqlParsingException(name + " is too large (stack overflow while parsing)")
   }
   override def parse(sql: String): Either[SqlNode, String] = {
     createStatement(sql)
+    //TODO
     Right("TODO")
   }
 }

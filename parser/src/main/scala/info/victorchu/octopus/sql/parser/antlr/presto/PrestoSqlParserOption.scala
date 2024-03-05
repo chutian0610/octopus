@@ -1,13 +1,10 @@
 package info.victorchu.octopus.sql.parser.antlr.presto
 
 import info.victorchu.octopus.sql.parser.SqlParserOption
-import info.victorchu.octopus.sql.parser.antlr.presto.PrestoParsingOptions.DecimalLiteralTreatment
 
 enum DecimalLiteralTreatment {
   case AS_DOUBLE, AS_DECIMAL, REJECT
 }
-
-
 case class PrestoSqlParserOption(
                              allowedIdentifierSymbols:Set[String],
                              enhancedErrorHandlerEnabled:Boolean,
