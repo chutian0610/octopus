@@ -1,32 +1,8 @@
 /*
  * @ref https://github.com/prestodb/presto/blob/master/presto-parser/src/main/antlr4/com/facebook/presto/sql/parser/SqlBase.g4
+ * @tag 0.284
  */
 grammar Presto;
-
-@members {
-  /**
-   * Verify whether current token is a valid decimal token (which contains dot).
-   * Returns true if the character that follows the token is not a digit or letter or underscore.
-   *
-   * For example:
-   * For char stream "2.3", "2." is not a valid decimal token, because it is followed by digit '3'.
-   * For char stream "2.3_", "2.3" is not a valid decimal token, because it is followed by '_'.
-   * For char stream "2.3W", "2.3" is not a valid decimal token, because it is followed by 'W'.
-   * For char stream "12.0D 34.E2+0.12 "  12.0D is a valid decimal token because it is followed
-   * by a space. 34.E2 is a valid decimal token because it is followed by symbol '+'
-   * which is not a digit or letter or underscore.
-   */
-  public boolean isValidDecimal() {
-    int nextChar = _input.LA(1);
-    if (nextChar >= 'A' && nextChar <= 'Z' || nextChar >= '0' && nextChar <= '9' ||
-      nextChar == '_') {
-      return false;
-    } else {
-      return true;
-    }
-  }
-}
-
 tokens {
     DELIMITER
 }
@@ -39,8 +15,8 @@ standaloneExpression
     : expression EOF
     ;
 
-standalonePathSpecification
-    : pathSpecification EOF
+standaloneRoutineBody
+    : routineBody EOF
     ;
 
 statement
@@ -62,42 +38,83 @@ statement
     | DROP TABLE (IF EXISTS)? qualifiedName                            #dropTable
     | INSERT INTO qualifiedName columnAliases? query                   #insertInto
     | DELETE FROM qualifiedName (WHERE booleanExpression)?             #delete
-    | ALTER TABLE from=qualifiedName RENAME TO to=qualifiedName        #renameTable
-    | ALTER TABLE tableName=qualifiedName
-        RENAME COLUMN from=identifier TO to=identifier                 #renameColumn
-    | ALTER TABLE tableName=qualifiedName
-        DROP COLUMN column=qualifiedName                               #dropColumn
-    | ALTER TABLE tableName=qualifiedName
-        ADD COLUMN column=columnDefinition                             #addColumn
-    | CREATE (OR REPLACE)? VIEW qualifiedName AS query                 #createView
+    | TRUNCATE TABLE qualifiedName                                     #truncateTable
+    | ALTER TABLE (IF EXISTS)? from=qualifiedName
+        RENAME TO to=qualifiedName                                     #renameTable
+    | ALTER TABLE (IF EXISTS)? tableName=qualifiedName
+        RENAME COLUMN (IF EXISTS)? from=identifier TO to=identifier    #renameColumn
+    | ALTER TABLE (IF EXISTS)? tableName=qualifiedName
+        DROP COLUMN (IF EXISTS)? column=qualifiedName                  #dropColumn
+    | ALTER TABLE (IF EXISTS)? tableName=qualifiedName
+        ADD COLUMN (IF NOT EXISTS)? column=columnDefinition            #addColumn
+    | ANALYZE qualifiedName (WITH properties)?                         #analyze
+    | CREATE TYPE qualifiedName AS (
+        '(' sqlParameterDeclaration (',' sqlParameterDeclaration)* ')'
+        | type)                                                        #createType
+    | CREATE (OR REPLACE)? VIEW qualifiedName
+            (SECURITY (DEFINER | INVOKER))? AS query                   #createView
     | DROP VIEW (IF EXISTS)? qualifiedName                             #dropView
+    | CREATE MATERIALIZED VIEW (IF NOT EXISTS)? qualifiedName
+        (COMMENT string)?
+        (WITH properties)? AS (query | '('query')')                    #createMaterializedView
+    | DROP MATERIALIZED VIEW (IF EXISTS)? qualifiedName                #dropMaterializedView
+    | REFRESH MATERIALIZED VIEW qualifiedName WHERE booleanExpression  #refreshMaterializedView
+    | CREATE (OR REPLACE)? TEMPORARY? FUNCTION functionName=qualifiedName
+        '(' (sqlParameterDeclaration (',' sqlParameterDeclaration)*)? ')'
+        RETURNS returnType=type
+        (COMMENT string)?
+        routineCharacteristics routineBody                             #createFunction
+    | ALTER FUNCTION qualifiedName types?
+      alterRoutineCharacteristics                                      #alterFunction
+    | DROP TEMPORARY? FUNCTION (IF EXISTS)? qualifiedName types?       #dropFunction
     | CALL qualifiedName '(' (callArgument (',' callArgument)*)? ')'   #call
+    | CREATE ROLE name=identifier
+        (WITH ADMIN grantor)?                                          #createRole
+    | DROP ROLE name=identifier                                        #dropRole
+    | GRANT
+        roles
+        TO principal (',' principal)*
+        (WITH ADMIN OPTION)?
+        (GRANTED BY grantor)?                                          #grantRoles
+    | REVOKE
+        (ADMIN OPTION FOR)?
+        roles
+        FROM principal (',' principal)*
+        (GRANTED BY grantor)?                                          #revokeRoles
+    | SET ROLE (ALL | NONE | role=identifier)                          #setRole
     | GRANT
         (privilege (',' privilege)* | ALL PRIVILEGES)
-        ON TABLE? qualifiedName TO grantee=identifier
+        ON TABLE? qualifiedName TO grantee=principal
         (WITH GRANT OPTION)?                                           #grant
     | REVOKE
         (GRANT OPTION FOR)?
         (privilege (',' privilege)* | ALL PRIVILEGES)
-        ON TABLE? qualifiedName FROM grantee=identifier                #revoke
+        ON TABLE? qualifiedName FROM grantee=principal                #revoke
     | SHOW GRANTS
         (ON TABLE? qualifiedName)?                                     #showGrants
     | EXPLAIN ANALYZE? VERBOSE?
         ('(' explainOption (',' explainOption)* ')')? statement        #explain
     | SHOW CREATE TABLE qualifiedName                                  #showCreateTable
     | SHOW CREATE VIEW qualifiedName                                   #showCreateView
+    | SHOW CREATE MATERIALIZED VIEW qualifiedName                      #showCreateMaterializedView
+    | SHOW CREATE FUNCTION qualifiedName types?                        #showCreateFunction
     | SHOW TABLES ((FROM | IN) qualifiedName)?
         (LIKE pattern=string (ESCAPE escape=string)?)?                 #showTables
     | SHOW SCHEMAS ((FROM | IN) identifier)?
         (LIKE pattern=string (ESCAPE escape=string)?)?                 #showSchemas
-    | SHOW CATALOGS (LIKE pattern=string)?                             #showCatalogs
+    | SHOW CATALOGS
+        (LIKE pattern=string (ESCAPE escape=string)?)?                 #showCatalogs
     | SHOW COLUMNS (FROM | IN) qualifiedName                           #showColumns
-    | SHOW STATS (FOR | ON) qualifiedName                              #showStats
+    | SHOW STATS FOR qualifiedName                                     #showStats
     | SHOW STATS FOR '(' querySpecification ')'                        #showStatsForQuery
+    | SHOW CURRENT? ROLES ((FROM | IN) identifier)?                    #showRoles
+    | SHOW ROLE GRANTS ((FROM | IN) identifier)?                       #showRoleGrants
     | DESCRIBE qualifiedName                                           #showColumns
     | DESC qualifiedName                                               #showColumns
-    | SHOW FUNCTIONS                                                   #showFunctions
-    | SHOW SESSION                                                     #showSession
+    | SHOW FUNCTIONS
+        (LIKE pattern=string (ESCAPE escape=string)?)?                 #showFunctions
+    | SHOW SESSION
+        (LIKE pattern=string (ESCAPE escape=string)?)?                 #showSession
     | SET SESSION qualifiedName EQ expression                          #setSession
     | RESET SESSION qualifiedName                                      #resetSession
     | START TRANSACTION (transactionMode (',' transactionMode)*)?      #startTransaction
@@ -108,7 +125,6 @@ statement
     | EXECUTE identifier (USING expression (',' expression)*)?         #execute
     | DESCRIBE INPUT identifier                                        #describeInput
     | DESCRIBE OUTPUT identifier                                       #describeOutput
-    | SET PATH pathSpecification                                       #setPath
     ;
 
 query
@@ -125,7 +141,7 @@ tableElement
     ;
 
 columnDefinition
-    : identifier type (COMMENT string)? (WITH properties)?
+    : identifier type (NOT NULL)? (COMMENT string)? (WITH properties)?
     ;
 
 likeClause
@@ -140,10 +156,64 @@ property
     : identifier EQ expression
     ;
 
+sqlParameterDeclaration
+    : identifier type
+    ;
+
+routineCharacteristics
+    : routineCharacteristic*
+    ;
+
+routineCharacteristic
+    : LANGUAGE language
+    | determinism
+    | nullCallClause
+    ;
+
+alterRoutineCharacteristics
+    : alterRoutineCharacteristic*
+    ;
+
+alterRoutineCharacteristic
+    : nullCallClause
+    ;
+
+routineBody
+    : returnStatement
+    | externalBodyReference
+    ;
+
+returnStatement
+    : RETURN expression
+    ;
+
+externalBodyReference
+    : EXTERNAL (NAME externalRoutineName)?
+    ;
+
+language
+    : SQL
+    | identifier
+    ;
+
+determinism
+    : DETERMINISTIC
+    | NOT DETERMINISTIC;
+
+nullCallClause
+    : RETURNS NULL ON NULL INPUT
+    | CALLED ON NULL INPUT
+    ;
+
+externalRoutineName
+    : identifier
+    ;
+
 queryNoWith:
       queryTerm
       (ORDER BY sortItem (',' sortItem)*)?
-      (LIMIT limit=(INTEGER_VALUE | ALL))? (OFFSET offset=INTEGER_VALUE)?  // add offset(for datae)
+      (OFFSET offset=INTEGER_VALUE (ROW | ROWS)?)?
+      ((LIMIT limit=(INTEGER_VALUE | ALL) | (FETCH FIRST fetchFirstNRows=INTEGER_VALUE ROWS ONLY))?)?
     ;
 
 queryTerm
@@ -242,14 +312,19 @@ columnAliases
     : '(' identifier (',' identifier)* ')'
     ;
 
-// @octopus add templateName 语法规则，用于表示 ${xxx} 引用动态视图 xxx 是视图名
 relationPrimary
     : qualifiedName                                                   #tableName
+    | templateName                                                    #templateTable
     | '(' query ')'                                                   #subqueryRelation
     | UNNEST '(' expression (',' expression)* ')' (WITH ORDINALITY)?  #unnest
     | LATERAL '(' query ')'                                           #lateral
-    | templateName                                                    #templateTable
     | '(' relation ')'                                                #parenthesizedRelation
+    ;
+/*
+ * @octopus add templateName 语法规则，用于表示 ${xxx} 引用动态视图 xxx 是视图名
+ */
+templateName
+    : '${' IDENTIFIER '}'
     ;
 
 expression
@@ -299,7 +374,7 @@ primaryExpression
     | ROW '(' expression (',' expression)* ')'                                            #rowConstructor
     | qualifiedName '(' ASTERISK ')' filter? over?                                        #functionCall
     | qualifiedName '(' (setQuantifier? expression (',' expression)*)?
-        (ORDER BY sortItem (',' sortItem)*)? ')' filter? over?                            #functionCall
+        (ORDER BY sortItem (',' sortItem)*)? ')' filter? (nullTreatment? over)?           #functionCall
     | identifier '->' expression                                                          #lambda
     | '(' (identifier (',' identifier)*)? ')' '->' expression                             #lambda
     | '(' query ')'                                                                       #subqueryExpression
@@ -319,7 +394,6 @@ primaryExpression
     | name=LOCALTIME ('(' precision=INTEGER_VALUE ')')?                                   #specialDateTimeFunction
     | name=LOCALTIMESTAMP ('(' precision=INTEGER_VALUE ')')?                              #specialDateTimeFunction
     | name=CURRENT_USER                                                                   #currentUser
-    | name=CURRENT_PATH                                                                   #currentPath
     | SUBSTRING '(' valueExpression FROM valueExpression (FOR valueExpression)? ')'       #substring
     | NORMALIZE '(' valueExpression (',' normalForm)? ')'                                 #normalize
     | EXTRACT '(' identifier FROM valueExpression ')'                                     #extract
@@ -330,6 +404,11 @@ primaryExpression
 string
     : STRING                                #basicStringLiteral
     | UNICODE_STRING (UESCAPE STRING)?      #unicodeStringLiteral
+    ;
+
+nullTreatment
+    : IGNORE NULLS
+    | RESPECT NULLS
     ;
 
 timeZoneSpecifier
@@ -361,6 +440,10 @@ normalForm
     : NFD | NFC | NFKD | NFKC
     ;
 
+types
+    : '(' (type (',' type)*)? ')'
+    ;
+
 type
     : type ARRAY
     | ARRAY '<' type '>'
@@ -378,7 +461,7 @@ baseType
     : TIME_WITH_TIME_ZONE
     | TIMESTAMP_WITH_TIME_ZONE
     | DOUBLE_PRECISION
-    | identifier
+    | qualifiedName
     ;
 
 whenClause
@@ -400,8 +483,10 @@ over
 windowFrame
     : frameType=RANGE start=frameBound
     | frameType=ROWS start=frameBound
+    | frameType=GROUPS start=frameBound
     | frameType=RANGE BETWEEN start=frameBound AND end=frameBound
     | frameType=ROWS BETWEEN start=frameBound AND end=frameBound
+    | frameType=GROUPS BETWEEN start=frameBound AND end=frameBound
     ;
 
 frameBound
@@ -434,15 +519,6 @@ callArgument
     | identifier '=>' expression    #namedArgument
     ;
 
-pathElement
-    : identifier '.' identifier     #qualifiedArgument
-    | identifier                    #unqualifiedArgument
-    ;
-
-pathSpecification
-    : pathElement (',' pathElement)*
-    ;
-
 privilege
     : SELECT | DELETE | INSERT | identifier
     ;
@@ -450,8 +526,21 @@ privilege
 qualifiedName
     : identifier ('.' identifier)*
     ;
-templateName
-    : '${' IDENTIFIER '}'
+
+grantor
+    : CURRENT_USER          #currentUserGrantor
+    | CURRENT_ROLE          #currentRoleGrantor
+    | principal             #specifiedPrincipal
+    ;
+
+principal
+    : USER identifier       #userPrincipal
+    | ROLE identifier       #rolePrincipal
+    | identifier            #unspecifiedPrincipal
+    ;
+
+roles
+    : identifier (',' identifier)*
     ;
 
 identifier
@@ -470,26 +559,26 @@ number
 
 nonReserved
     // IMPORTANT: this rule must only contain tokens. Nested rules are not supported. See SqlParser.exitNonReserved
-    : ADD | ALL | ANALYZE | ANY | ARRAY | ASC | AT
+    : ADD | ADMIN | ALL | ANALYZE | ANY | ARRAY | ASC | AT
     | BERNOULLI
-    | CALL | CASCADE | CATALOGS | COLUMN | COLUMNS | COMMENT | COMMIT | COMMITTED | CURRENT
-    | DATA | DATE | DAY | DESC | DISTRIBUTED
-    | EXCLUDING | EXPLAIN
-    | FILTER | FIRST | FOLLOWING | FORMAT | FUNCTIONS
-    | GRANT | GRANTS | GRAPHVIZ
+    | CALL | CALLED | CASCADE | CATALOGS | COLUMN | COLUMNS | COMMENT | COMMIT | COMMITTED | CURRENT | CURRENT_ROLE
+    | DATA | DATE | DAY | DEFINER | DESC | DETERMINISTIC | DISTRIBUTED
+    | EXCLUDING | EXPLAIN | EXTERNAL
+    | FETCH | FILTER | FIRST | FOLLOWING | FORMAT | FUNCTION | FUNCTIONS
+    | GRANT | GRANTED | GRANTS | GRAPHVIZ | GROUPS
     | HOUR
-    | IF | INCLUDING | INPUT | INTERVAL | IO | ISOLATION
+    | IF | IGNORE | INCLUDING | INPUT | INTERVAL | INVOKER | IO | ISOLATION
     | JSON
-    | LAST | LATERAL | LEVEL | LIMIT | LOGICAL
-    | MAP | MINUTE | MONTH
-    | NFC | NFD | NFKC | NFKD | NO | NULLIF | NULLS
-    | ONLY | OPTION | ORDINALITY | OUTPUT | OVER | OFFSET
-    | PARTITION | PARTITIONS | PATH | POSITION | PRECEDING | PRIVILEGES | PROPERTIES | PUBLIC
-    | RANGE | READ | RENAME | REPEATABLE | REPLACE | RESET | RESTRICT | REVOKE | ROLLBACK | ROW | ROWS
-    | SCHEMA | SCHEMAS | SECOND | SERIALIZABLE | SESSION | SET | SETS
+    | LANGUAGE | LAST | LATERAL | LEVEL | LIMIT | LOGICAL
+    | MAP | MATERIALIZED | MINUTE | MONTH
+    | NAME | NFC | NFD | NFKC | NFKD | NO | NONE | NULLIF | NULLS
+    | OFFSET | ONLY | OPTION | ORDINALITY | OUTPUT | OVER
+    | PARTITION | PARTITIONS | POSITION | PRECEDING | PRIVILEGES | PROPERTIES
+    | RANGE | READ | REFRESH | RENAME | REPEATABLE | REPLACE | RESET | RESPECT | RESTRICT | RETURN | RETURNS | REVOKE | ROLE | ROLES | ROLLBACK | ROW | ROWS
+    | SCHEMA | SCHEMAS | SECOND | SECURITY | SERIALIZABLE | SESSION | SET | SETS | SQL
     | SHOW | SOME | START | STATS | SUBSTRING | SYSTEM
-    | TABLES | TABLESAMPLE | TEXT | TIME | TIMESTAMP | TO | TRANSACTION | TRY_CAST | TYPE
-    | UNBOUNDED | UNCOMMITTED | USE
+    | TABLES | TABLESAMPLE | TEMPORARY | TEXT | TIME | TIMESTAMP | TO | TRANSACTION | TRUNCATE | TRY_CAST | TYPE
+    | UNBOUNDED | UNCOMMITTED | USE | USER
     | VALIDATE | VERBOSE | VIEW
     | WORK | WRITE
     | YEAR
@@ -497,6 +586,7 @@ nonReserved
     ;
 
 ADD: 'ADD';
+ADMIN: 'ADMIN';
 ALL: 'ALL';
 ALTER: 'ALTER';
 ANALYZE: 'ANALYZE';
@@ -510,6 +600,7 @@ BERNOULLI: 'BERNOULLI';
 BETWEEN: 'BETWEEN';
 BY: 'BY';
 CALL: 'CALL';
+CALLED: 'CALLED';
 CASCADE: 'CASCADE';
 CASE: 'CASE';
 CAST: 'CAST';
@@ -525,7 +616,7 @@ CROSS: 'CROSS';
 CUBE: 'CUBE';
 CURRENT: 'CURRENT';
 CURRENT_DATE: 'CURRENT_DATE';
-CURRENT_PATH: 'CURRENT_PATH';
+CURRENT_ROLE: 'CURRENT_ROLE';
 CURRENT_TIME: 'CURRENT_TIME';
 CURRENT_TIMESTAMP: 'CURRENT_TIMESTAMP';
 CURRENT_USER: 'CURRENT_USER';
@@ -533,9 +624,11 @@ DATA: 'DATA';
 DATE: 'DATE';
 DAY: 'DAY';
 DEALLOCATE: 'DEALLOCATE';
+DEFINER: 'DEFINER';
 DELETE: 'DELETE';
 DESC: 'DESC';
 DESCRIBE: 'DESCRIBE';
+DETERMINISTIC: 'DETERMINISTIC';
 DISTINCT: 'DISTINCT';
 DISTRIBUTED: 'DISTRIBUTED';
 DROP: 'DROP';
@@ -548,7 +641,9 @@ EXECUTE: 'EXECUTE';
 EXISTS: 'EXISTS';
 EXPLAIN: 'EXPLAIN';
 EXTRACT: 'EXTRACT';
+EXTERNAL: 'EXTERNAL';
 FALSE: 'FALSE';
+FETCH: 'FETCH';
 FILTER: 'FILTER';
 FIRST: 'FIRST';
 FOLLOWING: 'FOLLOWING';
@@ -556,15 +651,19 @@ FOR: 'FOR';
 FORMAT: 'FORMAT';
 FROM: 'FROM';
 FULL: 'FULL';
+FUNCTION: 'FUNCTION';
 FUNCTIONS: 'FUNCTIONS';
 GRANT: 'GRANT';
+GRANTED: 'GRANTED';
 GRANTS: 'GRANTS';
 GRAPHVIZ: 'GRAPHVIZ';
 GROUP: 'GROUP';
 GROUPING: 'GROUPING';
+GROUPS: 'GROUPS';
 HAVING: 'HAVING';
 HOUR: 'HOUR';
 IF: 'IF';
+IGNORE: 'IGNORE';
 IN: 'IN';
 INCLUDING: 'INCLUDING';
 INNER: 'INNER';
@@ -573,11 +672,13 @@ INSERT: 'INSERT';
 INTERSECT: 'INTERSECT';
 INTERVAL: 'INTERVAL';
 INTO: 'INTO';
+INVOKER: 'INVOKER';
 IO: 'IO';
 IS: 'IS';
 ISOLATION: 'ISOLATION';
 JSON: 'JSON';
 JOIN: 'JOIN';
+LANGUAGE: 'LANGUAGE';
 LAST: 'LAST';
 LATERAL: 'LATERAL';
 LEFT: 'LEFT';
@@ -588,14 +689,17 @@ LOCALTIME: 'LOCALTIME';
 LOCALTIMESTAMP: 'LOCALTIMESTAMP';
 LOGICAL: 'LOGICAL';
 MAP: 'MAP';
+MATERIALIZED: 'MATERIALIZED';
 MINUTE: 'MINUTE';
 MONTH: 'MONTH';
+NAME: 'NAME';
 NATURAL: 'NATURAL';
 NFC : 'NFC';
 NFD : 'NFD';
 NFKC : 'NFKC';
 NFKD : 'NFKD';
 NO: 'NO';
+NONE: 'NONE';
 NORMALIZE: 'NORMALIZE';
 NOT: 'NOT';
 NULL: 'NULL';
@@ -613,23 +717,27 @@ OUTPUT: 'OUTPUT';
 OVER: 'OVER';
 PARTITION: 'PARTITION';
 PARTITIONS: 'PARTITIONS';
-PATH: 'PATH';
 POSITION: 'POSITION';
 PRECEDING: 'PRECEDING';
 PREPARE: 'PREPARE';
 PRIVILEGES: 'PRIVILEGES';
 PROPERTIES: 'PROPERTIES';
-PUBLIC: 'PUBLIC';
 RANGE: 'RANGE';
 READ: 'READ';
 RECURSIVE: 'RECURSIVE';
+REFRESH: 'REFRESH';
 RENAME: 'RENAME';
 REPEATABLE: 'REPEATABLE';
 REPLACE: 'REPLACE';
 RESET: 'RESET';
+RESPECT: 'RESPECT';
 RESTRICT: 'RESTRICT';
+RETURN: 'RETURN';
+RETURNS: 'RETURNS';
 REVOKE: 'REVOKE';
 RIGHT: 'RIGHT';
+ROLE: 'ROLE';
+ROLES: 'ROLES';
 ROLLBACK: 'ROLLBACK';
 ROLLUP: 'ROLLUP';
 ROW: 'ROW';
@@ -637,6 +745,7 @@ ROWS: 'ROWS';
 SCHEMA: 'SCHEMA';
 SCHEMAS: 'SCHEMAS';
 SECOND: 'SECOND';
+SECURITY: 'SECURITY';
 SELECT: 'SELECT';
 SERIALIZABLE: 'SERIALIZABLE';
 SESSION: 'SESSION';
@@ -644,6 +753,7 @@ SET: 'SET';
 SETS: 'SETS';
 SHOW: 'SHOW';
 SOME: 'SOME';
+SQL: 'SQL';
 START: 'START';
 STATS: 'STATS';
 SUBSTRING: 'SUBSTRING';
@@ -651,6 +761,7 @@ SYSTEM: 'SYSTEM';
 TABLE: 'TABLE';
 TABLES: 'TABLES';
 TABLESAMPLE: 'TABLESAMPLE';
+TEMPORARY: 'TEMPORARY';
 TEXT: 'TEXT';
 THEN: 'THEN';
 TIME: 'TIME';
@@ -658,6 +769,7 @@ TIMESTAMP: 'TIMESTAMP';
 TO: 'TO';
 TRANSACTION: 'TRANSACTION';
 TRUE: 'TRUE';
+TRUNCATE: 'TRUNCATE';
 TRY_CAST: 'TRY_CAST';
 TYPE: 'TYPE';
 UESCAPE: 'UESCAPE';
@@ -666,6 +778,7 @@ UNCOMMITTED: 'UNCOMMITTED';
 UNION: 'UNION';
 UNNEST: 'UNNEST';
 USE: 'USE';
+USER: 'USER';
 USING: 'USING';
 VALIDATE: 'VALIDATE';
 VALUES: 'VALUES';
@@ -713,8 +826,8 @@ INTEGER_VALUE
     ;
 
 DECIMAL_VALUE
-    : DIGIT+ '.' DIGIT* {this.isValidDecimal()}?
-    | '.' DIGIT+ {this.isValidDecimal()}?
+    : DIGIT+ '.' DIGIT*
+    | '.' DIGIT+
     ;
 
 DOUBLE_VALUE

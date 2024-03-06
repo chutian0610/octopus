@@ -79,7 +79,7 @@ class PrestoSqlParser (options: PrestoSqlParserOption) extends SqlParser(options
 
   def createStatement(sql: String): ParserRuleContext = invokeParser("statement", sql,  x=>x.singleStatement())
   def createExpression(expression: String): ParserRuleContext = invokeParser("expression", expression,  x=>x.standaloneExpression())
-  def createPathSpecification(expression: String): ParserRuleContext = invokeParser("path specification", expression, x=>x.standalonePathSpecification())
+  def createPathSpecification(expression: String): ParserRuleContext = invokeParser("path specification", expression, x=>x.standaloneRoutineBody())
   private def invokeParser(name: String, sql: String, parseFunction: Function[PrestoParser, ParserRuleContext]): ParserRuleContext = try {
     val lexer: PrestoLexer = new PrestoLexer(new CaseInsensitiveStream(CharStreams.fromString(sql)))
     val tokenStream: CommonTokenStream = new CommonTokenStream(lexer)
