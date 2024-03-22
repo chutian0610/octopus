@@ -107,3 +107,7 @@ hs_err_pid*
 out
 gen
 .bsp
+.metals
+.vscode
+.bloop
+/project/project
