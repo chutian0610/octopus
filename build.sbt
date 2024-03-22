@@ -5,6 +5,7 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "info.victorchu"
 ThisBuild / scalaVersion := "3.3.1"
 
+addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.9.2" cross CrossVersion.full)
 
 // ================================ multi projects structure ==============================================
 
@@ -52,6 +53,7 @@ lazy val compilerOptions = Seq(
   "-feature",
   "-language:existentials",
   "-language:implicitConversions",
-  "-unchecked"
+  "-unchecked",
+  "-Yrangepos"
 
 )
