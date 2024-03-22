@@ -13,7 +13,7 @@ class PrestoSqlParserTest extends AnyWordSpec {
           | ORDER  BY productid
           | LIMIT  3""".stripMargin
       val statement = PrestoSqlParser().createStatement(sql)
-      println(new PrestoAntlr4Printer().visit(statement))
+      info(new PrestoAntlr4Printer().visit(statement))
     }
   }
 }
