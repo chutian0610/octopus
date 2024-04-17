@@ -1,7 +1,6 @@
 package io.octopus.sql.utils
-case class EngineInstance(engineType:Engine, version:Version)
 enum Engine{
-  case PRESTO
+  case PRESTO,MYSQL
 }
 
 sealed trait Version{
@@ -24,3 +23,5 @@ case class RangeVersion(min:Option[Int],max:Option[Int]) extends Version{
     minCheck && maxCheck
   }
 }
+
+case class EngineInstance(engineType:Engine, version:Version)

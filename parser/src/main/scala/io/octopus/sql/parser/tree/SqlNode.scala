@@ -1,6 +1,6 @@
-package io.octopus.sql.tree
+package io.octopus.sql.parser.tree
 
-import io.octopus.sql.parser.SqlNodePosition
+import io.octopus.sql.parser.Position
 import io.octopus.sql.utils.Engine
 
 import java.util.Locale
@@ -10,7 +10,7 @@ import java.util.Locale
  *
  * @param position sql position
  */
-abstract class SqlNode(position: Option[SqlNodePosition] = None) {
+abstract class SqlNode(position: Option[Position] = None) {
   /**
    * get children Sql Node
    *

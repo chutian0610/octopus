@@ -1,21 +1,21 @@
-package io.octopus.sql.tree
+package io.octopus.sql.parser.tree
 
 import com.google.common.io.BaseEncoding
-import io.octopus.sql.parser.{SqlNodePosition, SqlParsingException}
+import io.octopus.sql.parser.{Position, SqlParsingException}
 
 import java.util.Locale
 import java.util.regex.Pattern
-sealed abstract class Literal(position: Option[SqlNodePosition] = None) extends Expression(position) {
+sealed abstract class Literal(position: Option[Position] = None) extends Expression(position) {
   override def getChildren: List[SqlNode] = List.empty
 }
-case class NullLiteral(position: Option[SqlNodePosition] = None) extends Literal(position) {}
+case class NullLiteral(position: Option[Position] = None) extends Literal(position) {}
 
-case class BooleanLiteral(position: Option[SqlNodePosition] = None, value: Boolean) extends Literal(position) {}
+case class BooleanLiteral(position: Option[Position] = None, value: Boolean) extends Literal(position) {}
 
 object BooleanLiteral {
   val TRUE_LITERAL: BooleanLiteral = fromString(Option.empty, "true")
   val FALSE_LITERAL: BooleanLiteral = fromString(Option.empty, "false")
-  def fromString(position: Option[SqlNodePosition] = None, value: String): BooleanLiteral = {
+  def fromString(position: Option[Position] = None, value: String): BooleanLiteral = {
 
     require(value != null)
     require(value.toLowerCase(Locale.ENGLISH).equals("true") || value.toLowerCase(Locale.ENGLISH).equals("false"))
@@ -23,7 +23,7 @@ object BooleanLiteral {
   }
 }
 
-case class BinaryLiteral(position: Option[SqlNodePosition] = None, value: Array[Byte]) extends Literal(position) {
+case class BinaryLiteral(position: Option[Position] = None, value: Array[Byte]) extends Literal(position) {
   def toHexString: String = BaseEncoding.base16().encode(value)
 }
 
@@ -31,7 +31,7 @@ object BinaryLiteral{
 
   private val WHITESPACE_PATTERN: Pattern =  Pattern.compile("[ \\r\\n\\t]")
   private val NOT_HEX_DIGIT_PATTERN:Pattern =  Pattern.compile(".*[^A-F0-9].*")
-  def fromString(position: Option[SqlNodePosition] = None, value: String): BinaryLiteral = {
+  def fromString(position: Option[Position] = None, value: String): BinaryLiteral = {
     require(value != null)
     val hexString = WHITESPACE_PATTERN.matcher(value).replaceAll("").toUpperCase()
     if (NOT_HEX_DIGIT_PATTERN.matcher(hexString).matches()) {
@@ -44,11 +44,11 @@ object BinaryLiteral{
   }
 }
 
-case class StringLiteral(position: Option[SqlNodePosition] = None, value: String) extends Literal(position)
-case class IntegerLiteral(position: Option[SqlNodePosition] = None, value: Int) extends Literal(position)
-case class LongLiteral(position: Option[SqlNodePosition] = None, value: Long) extends Literal(position)
+case class StringLiteral(position: Option[Position] = None, value: String) extends Literal(position)
+case class IntegerLiteral(position: Option[Position] = None, value: Int) extends Literal(position)
+case class LongLiteral(position: Option[Position] = None, value: Long) extends Literal(position)
 object IntegerLiteral {
-  def apply(position: Option[SqlNodePosition], value: String): IntegerLiteral = {
+  def apply(position: Option[Position], value: String): IntegerLiteral = {
     IntegerLiteral(position, value.toInt)
   }
 
@@ -56,9 +56,9 @@ object IntegerLiteral {
     IntegerLiteral(None, value.toInt)
   }
 }
-case class DoubleLiteral(position: Option[SqlNodePosition] = None, value: Double) extends Literal(position)
+case class DoubleLiteral(position: Option[Position] = None, value: Double) extends Literal(position)
 object DoubleLiteral {
-  def apply(position: Option[SqlNodePosition], value: String): DoubleLiteral = {
+  def apply(position: Option[Position], value: String): DoubleLiteral = {
     DoubleLiteral(position, value.toDouble)
   }
 
@@ -66,7 +66,7 @@ object DoubleLiteral {
     DoubleLiteral(None, value.toDouble)
   }
 }
-case class DecimalLiteral(position: Option[SqlNodePosition] = None, value: String) extends Literal(position)
+case class DecimalLiteral(position: Option[Position] = None, value: String) extends Literal(position)
 
 
 enum IntervalSign {
@@ -77,18 +77,18 @@ enum IntervalField {
   case YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
 }
 
-case class IntervalLiteral(position: Option[SqlNodePosition] = None,
+case class IntervalLiteral(position: Option[Position] = None,
                            value: String,
                            sign: IntervalSign,
                            startField: IntervalField,
                            endField: Option[IntervalField] = None
                           ) extends Literal(position)
 
-case class GenericLiteral(position: Option[SqlNodePosition] = None,
+case class GenericLiteral(position: Option[Position] = None,
                           literalType: String,
                           value: String) extends Literal(position)
 
-case class DateLiteral(position: Option[SqlNodePosition] = None, value: String) extends Literal(position)
-case class TimeLiteral(position: Option[SqlNodePosition] = None, value: String) extends Literal(position)
-case class TimestampLiteral(position: Option[SqlNodePosition] = None, value: String) extends Literal(position)
+case class DateLiteral(position: Option[Position] = None, value: String) extends Literal(position)
+case class TimeLiteral(position: Option[Position] = None, value: String) extends Literal(position)
+case class TimestampLiteral(position: Option[Position] = None, value: String) extends Literal(position)
 

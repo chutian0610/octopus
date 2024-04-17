@@ -1,32 +1,24 @@
 package io.octopus.sql.parser
 
-case class SqlParsingException(message: String, cause: Throwable, val line: Int, val charPositionInLine: Int) extends RuntimeException(message, cause) {
-
-  override def getMessage: String = s"line ${this.getLineNumber}:${this.getColumnNumber}: ${this.getErrorMessage}"
-
-  def getLineNumber: Int = this.line
-
-  def getColumnNumber: Int = this.charPositionInLine + 1
-
-  def getErrorMessage: String = super.getMessage
+case class SqlParsingException(message: String, cause: Throwable, position: Position) extends RuntimeException(message, cause) {
+  override def getMessage: String = s"error at line ${position.getLineNumber}:${position.getColumnNumber}: ${this.message}"
 }
 
 object SqlParsingException {
-
-  def apply(message: String):SqlParsingException = {
-    SqlParsingException(message, null, 1, 0)
+  def apply(message: String): SqlParsingException = {
+    SqlParsingException(message, null, Position(1, 0))
   }
 
-  def apply(message: String,nodeLocation: Option[SqlNodePosition]):SqlParsingException = {
-    if (nodeLocation.isDefined) {
-      SqlParsingException(message, null, nodeLocation.get.getLineNumber, nodeLocation.get.getColumnNumber)
+  def apply(message: String, position: Option[Position]): SqlParsingException = {
+    if (position.isDefined) {
+      SqlParsingException(message, null, position.get)
     } else {
-      SqlParsingException(message, null, 1, 0)
+      SqlParsingException(message, null, Position(1, 0))
     }
   }
 
-  def apply(message: String, nodeLocation: SqlNodePosition):SqlParsingException= {
-    SqlParsingException(message, null, nodeLocation.getLineNumber, nodeLocation.getColumnNumber)
+  def apply(message: String, position: Position): SqlParsingException = {
+    SqlParsingException(message, null, position)
   }
 
 }

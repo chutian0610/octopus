@@ -1,11 +1,11 @@
-package io.octopus.sql.tree
+package io.octopus.sql.parser.tree
 
-import io.octopus.sql.parser.SqlNodePosition
+import io.octopus.sql.parser.Position
 import io.octopus.sql.utils.Engine
 
-abstract class Expression(position: Option[SqlNodePosition] = None) extends SqlNode(position) {}
+abstract class Expression(position: Option[Position] = None) extends SqlNode(position) {}
 
-case class Identifier(position: Option[SqlNodePosition] = None,
+case class Identifier(position: Option[Position] = None,
                       value: String,
                       delimited: Boolean = false
                      ) extends Expression(position) {
@@ -13,7 +13,7 @@ case class Identifier(position: Option[SqlNodePosition] = None,
 }
 
 
-case class QualifiedName(position: Option[SqlNodePosition] = None,
+case class QualifiedName(position: Option[Position] = None,
                          parts: List[Identifier]
                         ) extends Expression(position) {
   override def getChildren: List[SqlNode] = List.empty
@@ -28,7 +28,7 @@ object QualifiedName {
     QualifiedName(parts = value.map(value => Identifier(value = value)))
   }
 }
-case class DereferenceExpression(position: Option[SqlNodePosition] = None,
+case class DereferenceExpression(position: Option[Position] = None,
                                  base: Expression,
                                  field: Identifier) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(base)
@@ -47,11 +47,11 @@ enum LogicalOperator {
   }
 }
 
-case class LogicalNotExpression(position: Option[SqlNodePosition] = None, expression: Expression) extends Expression(position) {
+case class LogicalNotExpression(position: Option[Position] = None, expression: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(expression)
 }
 
-case class LogicalBinaryExpression(position: Option[SqlNodePosition] = None, operator: LogicalOperator, left: Expression, right: Expression) extends Expression(position) {
+case class LogicalBinaryExpression(position: Option[Position] = None, operator: LogicalOperator, left: Expression, right: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(left, right)
 }
 
@@ -101,31 +101,31 @@ enum ComparisonOperator {
   }
 }
 
-case class ComparisonExpression(position: Option[SqlNodePosition] = None,
+case class ComparisonExpression(position: Option[Position] = None,
                                 operator: ComparisonOperator,
                                 left: Expression,
                                 right: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(left, right)
 }
 
-case class NotExpression(position: Option[SqlNodePosition] = None, expression: Expression) extends Expression(position) {
+case class NotExpression(position: Option[Position] = None, expression: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(expression)
 }
 
-case class BetweenPredicate(position: Option[SqlNodePosition] = None, value: Expression, min: Expression, max: Expression) extends Expression(position) {
+case class BetweenPredicate(position: Option[Position] = None, value: Expression, min: Expression, max: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(value, min, max)
 }
 
-case class IsNullPredicate(position: Option[SqlNodePosition] = None, value: Expression) extends Expression(position) {
+case class IsNullPredicate(position: Option[Position] = None, value: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(value)
 }
 
-case class IsNotNullPredicate(position: Option[SqlNodePosition] = None,
+case class IsNotNullPredicate(position: Option[Position] = None,
                               value: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(value)
 }
 
-case class LikePredicate(position: Option[SqlNodePosition] = None,
+case class LikePredicate(position: Option[Position] = None,
                          value: Expression,
                          pattern: Expression,
                          escape: Option[Expression] = None) extends Expression(position) {
@@ -134,23 +134,23 @@ case class LikePredicate(position: Option[SqlNodePosition] = None,
   }
 }
 
-case class InPredicate(position: Option[SqlNodePosition] = None,
+case class InPredicate(position: Option[Position] = None,
                        value: Expression,
                        valueList: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(value, valueList)
 }
 
-case class InListExpression(position: Option[SqlNodePosition] = None,
+case class InListExpression(position: Option[Position] = None,
                             values: List[Expression]) extends Expression(position) {
   override def getChildren: List[SqlNode] = values
 }
 
-case class SubqueryExpression(position: Option[SqlNodePosition] = None,
+case class SubqueryExpression(position: Option[Position] = None,
                               query: Query) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(query)
 }
 
-case class ExistsPredicate(position: Option[SqlNodePosition] = None,
+case class ExistsPredicate(position: Option[Position] = None,
                            subExpression: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(subExpression)
 }
@@ -159,7 +159,7 @@ enum QuantifierType {
   case ALL, ANY, SOME
 }
 
-case class QuantifiedComparisonExpression(position: Option[SqlNodePosition] = None,
+case class QuantifiedComparisonExpression(position: Option[Position] = None,
                                           comparisonOperator: ComparisonOperator,
                                           quantifierType: QuantifierType,
                                           value: Expression,
@@ -174,7 +174,7 @@ enum ArithmeticUnarySign {
   case PLUS, MINUS
 }
 
-case class ArithmeticUnaryExpression(position: Option[SqlNodePosition] = None,
+case class ArithmeticUnaryExpression(position: Option[Position] = None,
                                      sign: ArithmeticUnarySign,
                                      value: Expression) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(value)
@@ -184,7 +184,7 @@ enum ArithmeticBinaryOperator {
   case ADD, SUBTRACT, MULTIPLY, DIVIDE, MODULUS
 }
 
-case class ArithmeticBinaryExpression(position: Option[SqlNodePosition] = None,
+case class ArithmeticBinaryExpression(position: Option[Position] = None,
                                       operator: ArithmeticBinaryOperator,
                                       left: Expression,
                                       right: Expression) extends Expression(position) {
@@ -193,7 +193,7 @@ case class ArithmeticBinaryExpression(position: Option[SqlNodePosition] = None,
 
 
 // ********************************** FunctionCall **********************************
-case class FunctionCall(position: Option[SqlNodePosition] = None,
+case class FunctionCall(position: Option[Position] = None,
                         name: QualifiedName,
                         window: Option[Window] = None,
                         filter: Option[Expression] = None,
@@ -213,7 +213,7 @@ case class FunctionCall(position: Option[SqlNodePosition] = None,
   }
 }
 
-case class Window(position: Option[SqlNodePosition] = None,
+case class Window(position: Option[Position] = None,
                   partitionBy: List[Expression],
                   orderBy: Option[OrderBy] = None,
                   frame: Option[WindowFrame] = None
@@ -230,7 +230,7 @@ enum WindowFrameType {
   case ROWS, RANGE, GROUPS
 }
 
-case class WindowFrame(position: Option[SqlNodePosition] = None,
+case class WindowFrame(position: Option[Position] = None,
                        frameType: WindowFrameType,
                        start: WindowFrameBound,
                        end: Option[WindowFrameBound] = None
@@ -242,13 +242,13 @@ enum WindowFrameBoundType {
   case UNBOUNDED_PRECEDING, PRECEDING, CURRENT_ROW, FOLLOWING, UNBOUNDED_FOLLOWING
 }
 
-case class WindowFrameBound(position: Option[SqlNodePosition] = None,
+case class WindowFrameBound(position: Option[Position] = None,
                             BoundType: WindowFrameBoundType,
                             value: Option[Expression]) extends SqlNode(position) {
   override def getChildren: List[SqlNode] = value.toList
 }
 
-case class LambdaExpression(position: Option[SqlNodePosition] = None,
+case class LambdaExpression(position: Option[Position] = None,
                             arguments: List[LambdaArgumentDeclaration],
                             body: Expression
                            ) extends Expression(position) {
@@ -259,27 +259,27 @@ case class LambdaExpression(position: Option[SqlNodePosition] = None,
   }
 }
 
-case class LambdaArgumentDeclaration(position: Option[SqlNodePosition] = None,
+case class LambdaArgumentDeclaration(position: Option[Position] = None,
                                      name: Identifier) extends Expression {
   override def getChildren: List[SqlNode] = List.empty
 }
 
-case class AtTimeZone(position: Option[SqlNodePosition] = None,
+case class AtTimeZone(position: Option[Position] = None,
                       value: Expression,
                       timeZone: Expression
                      ) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(value, timeZone)
 }
 
-case class RowConstructor(position: Option[SqlNodePosition] = None, items: List[Expression]) extends Expression(position) {
+case class RowConstructor(position: Option[Position] = None, items: List[Expression]) extends Expression(position) {
   override def getChildren: List[SqlNode] = items
 }
 
-case class ArrayConstructor(position: Option[SqlNodePosition] = None, values: List[Expression]) extends Expression(position) {
+case class ArrayConstructor(position: Option[Position] = None, values: List[Expression]) extends Expression(position) {
   override def getChildren: List[SqlNode] = values
 }
 
-case class Cast(position: Option[SqlNodePosition] = None,
+case class Cast(position: Option[Position] = None,
                 expression: Expression,
                 toType: String,
                 safe: Boolean = false,
@@ -288,14 +288,14 @@ case class Cast(position: Option[SqlNodePosition] = None,
   override def getChildren: List[SqlNode] = List(expression)
 }
 
-case class Subscript(position: Option[SqlNodePosition] = None,
+case class Subscript(position: Option[Position] = None,
                      base: Expression,
                      index: Expression
                     ) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(base, index)
 }
 
-case class SimpleCaseExpression(position: Option[SqlNodePosition] = None,
+case class SimpleCaseExpression(position: Option[Position] = None,
                                 operand: Expression,
                                 whenClauses: List[WhenClause],
                                 defaultValue: Option[Expression] = None
@@ -309,7 +309,7 @@ case class SimpleCaseExpression(position: Option[SqlNodePosition] = None,
   }
 }
 
-case class SearchedCaseExpression(position: Option[SqlNodePosition] = None,
+case class SearchedCaseExpression(position: Option[Position] = None,
                                   whenClauses: List[WhenClause],
                                   defaultValue: Option[Expression] = None
                                  ) extends Expression(position) {
@@ -321,14 +321,14 @@ case class SearchedCaseExpression(position: Option[SqlNodePosition] = None,
   }
 }
 
-case class WhenClause(position: Option[SqlNodePosition] = None,
+case class WhenClause(position: Option[Position] = None,
                       operand: Expression,
                       result: Expression
                      ) extends Expression(position) {
   override def getChildren: List[SqlNode] = List(operand, result)
 }
 
-case class GroupingOperation(position: Option[SqlNodePosition] = None, groupingColumns: List[QualifiedName]) extends Expression {
+case class GroupingOperation(position: Option[Position] = None, groupingColumns: List[QualifiedName]) extends Expression {
   override def getChildren: List[SqlNode] = List()
 }
 
