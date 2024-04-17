@@ -21,4 +21,8 @@ object SqlParsingException {
     SqlParsingException(message, null, position)
   }
 
+  def apply(sqlParsingException: SqlParsingException,position: Position): SqlParsingException = {
+    SqlParsingException(sqlParsingException.message,sqlParsingException.cause, position)
+  }
+
 }

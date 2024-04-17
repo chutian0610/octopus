@@ -1,86 +1,116 @@
 package io.octopus.sql.parser.token
 
-import io.octopus.sql.parser.Position
-import io.octopus.sql.parser.token.WhiteSpace.{NEW_LINE, SPACE, TAB}
+import io.octopus.sql.parser.token.TokenType.EOF
+import io.octopus.sql.parser.{Position, SqlParsingException}
 
-case class Token(text: String, tokenType: TokenType, position: Option[Position] = None) {
+import scala.util.Right
+
+case class TokenWithPosition(token: Token, position: Option[Position]) {
   override def toString: String = {
-    val typeCatalog =  tokenType match {
-      case literal: Literal=> "Literal"
+    position match {
+      case Some(value) => s"Token($token, $position)"
+      case None => s"Token($token)"
+    }
+  }
+}
+
+object TokenWithPosition:
+  def apply(token: Token, position: Position): TokenWithPosition = {
+    TokenWithPosition(token, Some(position))
+  }
+end TokenWithPosition
+
+sealed trait Token {
+  def tokenType: TokenType
+
+  def text: String
+
+  override def toString: String = {
+    val typeCatalog = this match {
+      case literal: Literal => "Literal"
       case word: Word => "Word"
       case symbol: Symbol => "Symbol"
       case whiteSpace: WhiteSpace => "WhiteSpace"
-      case EOF => ""
     }
-    position match {
-      case Some(value) =>  s"Token(\"$text\", $typeCatalog.$tokenType, $position)"
-      case None =>  s"Token(\"$text\", $typeCatalog.$tokenType)"
-    }
+    s"\"$text\", $typeCatalog.$tokenType"
   }
 }
 
-object Token{
-  def apply(text: String, tokenType: TokenType, position: Position): Token = Token(text, tokenType, Some(position))
-
-  def whiteSpace(whiteSpace: WhiteSpace, position: Position):Token = {
-    whiteSpace match
-      case SPACE => Token("\n",WhiteSpace.SPACE,position)
-      case TAB => Token("\t",WhiteSpace.TAB,position)
-      case NEW_LINE => Token("\n",WhiteSpace.NEW_LINE,position)
+object Tokens {
+  def space: Token = {
+    WhiteSpace.SPACE(" ")
   }
 
-  def binaryLiteral(text: String, position: Position):Token={
-    Token(text,Literal.BINARY,position)
+  def tab: Token = {
+    WhiteSpace.TAB("\t")
+  }
+
+  def newLine: Token = {
+    WhiteSpace.NEW_LINE("\n")
+  }
+
+  def eof: Token = {
+    WhiteSpace.EOF("\u001A")
+  }
+
+  def hexString(text: String): Token = {
+    Literal.HexString(text)
+  }
+
+  def singleQuotedString(text: String): Token = {
+    Literal.SingleQuotedString(text)
+  }
+
+  def doubleQuotedString(text: String): Token = {
+    Literal.DoubleQuotedString(text)
+  }
+
+  def identifier(text: String, quote: Option[Char]): Token = {
+    Word.Identifier(text, quote)
+  }
+
+  def keyWord(text: String): Token = {
+    Word.KeyWord(text)
   }
 }
 
-sealed trait TokenType
 
-enum Literal extends TokenType {
-  case STRING
-  , LONG
-  , DOUBLE
-  , DECIMAL
-  , BINARY
+enum Literal(text: String,
+             tokenType: TokenType) extends Token {
+  case HexString(text: String, tokenType: TokenType = TokenType.HEX_STRING) extends Literal(text, tokenType)
+  case SingleQuotedString(text: String, tokenType: TokenType = TokenType.SINGLE_QUOTED_STRING) extends Literal(text, tokenType)
+  case DoubleQuotedString(text: String, tokenType: TokenType = TokenType.DOUBLE_QUOTED_STRING) extends Literal(text, tokenType)
 }
 
-enum Word extends TokenType {
-  case IDENTIFIER
-  , KEYWORD
-}
-object EOF extends TokenType{
-  override def toString: String = "EOF"
+enum Word(text: String,
+
+          tokenType: TokenType) extends Token {
+  case KeyWord(text: String, tokenType: TokenType = TokenType.KEYWORD) extends Word(text, tokenType)
+  case Identifier(text: String, quote: Option[Char], tokenType: TokenType = TokenType.IDENTIFIER) extends Word(text, tokenType)
 }
 
-enum WhiteSpace extends TokenType {
-  case SPACE,NEW_LINE,TAB
+object Word:
+  def matchingEndQuote(c: Char): Either[SqlParsingException, Char] = {
+    c match
+      case '\"' => Right('\"')
+      case '`' => Right('`')
+      case '[' => Right(']')
+      case _ => Left(SqlParsingException("unexpected quoting style!"))
+  }
+end Word
+
+enum WhiteSpace(
+                 text: String,
+
+                 tokenType: TokenType) extends Token {
+  case SPACE(text: String, tokenType: TokenType = TokenType.SPACE) extends WhiteSpace(text, tokenType)
+  case TAB(text: String, tokenType: TokenType = TokenType.TAB) extends WhiteSpace(text, tokenType)
+  case NEW_LINE(text: String, tokenType: TokenType = TokenType.NEW_LINE) extends WhiteSpace(text, tokenType)
+  case EOF(text: String, tokenType: TokenType = TokenType.EOF) extends WhiteSpace(text, tokenType)
 }
 
-enum Symbol extends TokenType {
-  case EQ // `=`
-  , NEQ // `<>` or `!=`
-  , LT // `<`
-  , LTE // `<=`
-  , GT // `>`
-  , GTE // `>=`
-  , PLUS // `+`
-  , MINUS // `-`
-  , ASTERISK // `*`
-  , DIV // `/`
-  , PERCENT // `%`
-  , CONCAT // `||`
-  , LEFT_PAREN // `(`
-  , RIGHT_PAREN // `)`
-  , LEFT_BRACKET // `[`
-  , RIGHT_BRACKET // `]`
-  , LEFT_BRACE // `{`
-  , RIGHT_BRACE // `}`
-  , COMMA // `,`
-  , DOT // `.`
-  , SEMICOLON // `;`
-  , COLON // `:`
-  , DOUBLE_COLON // `::`
-  , AT // `@`
-  , QUESTION // `?`
-  , ARROW // `->` or `=>`
+enum Symbol(text: String,
+
+            tokenType: TokenType) extends Token {
+  case EQ(text: String, tokenType: TokenType = TokenType.EQ) extends Symbol(text, tokenType)
 }

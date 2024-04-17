@@ -2,11 +2,13 @@ package io.octopus.sql.parser.token
 
 import io.octopus.sql.parser.Position
 
-case class CharStream(text: String, var current: Int,var line:Int,var column:Int) {
-  def peek(): Option[Char] = text.lift(current)
+import scala.util.control.Breaks.{break, breakable}
 
-  def next(): Option[Char] = {
-    if(current < text.length){
+case class CharStream(text: String, var current: Int, var line: Int, var column: Int) {
+  def peek: Option[Char] = text.lift(current)
+
+  def next: Option[Char] = {
+    if (current < text.length) {
       current += 1
       val c = text.lift(current)
       c match {
@@ -21,14 +23,30 @@ case class CharStream(text: String, var current: Int,var line:Int,var column:Int
         case None =>
       }
       c
-    }else {
+    } else {
       None
     }
+  }
+
+  def peekCharsWhile(predicate: Char => Boolean): String = {
+    val stringBuilder = new StringBuilder()
+    breakable {
+      while (peek.isDefined) {
+        val ch = peek.get
+        if (predicate(ch)) {
+          next
+          stringBuilder.append(ch)
+        } else {
+          break
+        }
+      }
+    }
+    stringBuilder.toString()
   }
 
   def position: Position = Position(line, column)
 }
 
-object CharStream{
+object CharStream {
   def apply(text: String): CharStream = CharStream(text, 0, 0, 0)
 }
