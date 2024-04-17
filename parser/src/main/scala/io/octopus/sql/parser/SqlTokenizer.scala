@@ -85,15 +85,34 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
           }
           // number
           case n if (0 to 9 contains n) || n == '.' => {
+            val sb = new StringBuilder()
             val s = chars.peekCharsWhile(x => CharMatcher.digit().matches(x))
+            sb.append(s)
             // match binary literal that starts with 0x
             if (s == "0" && chars.peek.contains('x')) {
               chars.next // consumer 'x'
               val s2 = chars.peekCharsWhile(x => CharMatcher.digit()
                 .and(CharMatcher.inRange('a', 'z'))
                 .and(CharMatcher.inRange('A', 'Z')).matches(x));
-              Right(Tokens.hexString(s2))
+              return Right(Tokens.hexString(s2))
             }
+            // match decimal point
+            if(chars.peek.contains('.')){
+              sb.append(".")
+              chars.next
+            }
+            sb.append(chars.peekCharsWhile(x => CharMatcher.digit().matches(x)))
+            // maybe is '.'
+            if(sb.toString() ==  "."){
+              return Right(Tokens.dot)
+            }
+            // parse exponent
+            val exponent_part = new StringBuilder()
+            if(chars.peek.exists(x => x == 'e' || x == 'E')){
+              val chars_clone = chars.copy()
+              exponent_part.append(chars_clone.next)
+            }
+
           }
         }
       }
@@ -111,7 +130,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
 
   private def scanQuotedIdentifier(chars: CharStream, quoteEnd: Char): Either[SqlParsingException, (String, Option[Char])] = {
     var lastChar: Option[Char] = None
-    val stringBuilder = new StringBuilder()
+    val sb = new StringBuilder()
     var ch = chars.next
     while (ch.isDefined) {
       if (ch.get == quoteEnd) {
@@ -119,16 +138,16 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
           case Some(c) if c == quoteEnd => {
             // escape mode
             chars.next // consume escaped char
-            stringBuilder.append(ch)
+            sb.append(ch)
           }
           case _ => {
             lastChar = Some(quoteEnd)
-            return Right(stringBuilder.toString(), lastChar)
+            return Right(sb.toString(), lastChar)
           }
         }
       }
       else {
-        stringBuilder.append(ch)
+        sb.append(ch)
       }
       ch = chars.next
     }
@@ -137,14 +156,14 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
   }
 
   private def scanKeyWord(first: Char, chars: CharStream): String = {
-    val stringBuilder = new StringBuilder()
-    stringBuilder.append(first)
-    stringBuilder.append(chars.peekCharsWhile(x => sqlDialect.partOfIdentifier(x)))
-    stringBuilder.toString()
+    val sb = new StringBuilder()
+    sb.append(first)
+    sb.append(chars.peekCharsWhile(x => sqlDialect.partOfIdentifier(x)))
+    sb.toString()
   }
 
   private def scanQuotedString(chars: CharStream, quote: Char): Either[SqlParsingException, String] = {
-    val stringBuilder = new StringBuilder()
+    val sb = new StringBuilder()
     // consume opening quote char
     chars.next
     while (chars.peek.isDefined) {
@@ -154,16 +173,16 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
           chars.next
           if (chars.peek.contains(quote)) {
             // escape mode
-            stringBuilder.append(ch)
+            sb.append(ch)
             chars.next
           } else {
             // end of string
-            return Right(stringBuilder.toString())
+            return Right(sb.toString())
           }
         }
         case _ => {
           chars.next
-          stringBuilder.append(ch)
+          sb.append(ch)
         }
     }
     // incomplete Token

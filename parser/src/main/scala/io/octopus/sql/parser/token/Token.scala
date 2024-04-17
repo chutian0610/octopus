@@ -72,6 +72,10 @@ object Tokens {
   def keyWord(text: String): Token = {
     Word.KeyWord(text)
   }
+
+  def dot:Token={
+    Symbol.DOT(".")
+  }
 }
 
 
@@ -113,4 +117,5 @@ enum Symbol(text: String,
 
             tokenType: TokenType) extends Token {
   case EQ(text: String, tokenType: TokenType = TokenType.EQ) extends Symbol(text, tokenType)
+  case DOT(text: String, tokenType: TokenType = TokenType.DOT) extends Symbol(text, tokenType)
 }
