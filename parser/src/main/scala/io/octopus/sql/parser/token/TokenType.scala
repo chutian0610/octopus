@@ -2,13 +2,9 @@ package io.octopus.sql.parser.token
 enum TokenType {
   case
   // Literal
-  HEX_STRING
-  , SINGLE_QUOTED_STRING
-  , DOUBLE_QUOTED_STRING
-  , LONG
-  , DOUBLE
-  , DECIMAL
-  , BINARY
+    HEX_STRING
+  , NATURAL_String
+  , NUMBER
   // Word
   , IDENTIFIER
   , KEYWORD
@@ -19,6 +15,8 @@ enum TokenType {
   , SPACE
   , NEW_LINE
   , TAB
+  , SINGLE_LINE_COMMENT
+  , MULTI_LINE_COMMENT
   // Symbol
   , EQ // `=`
   , NEQ // `<>` or `!=`
@@ -29,7 +27,7 @@ enum TokenType {
   , PLUS // `+`
   , MINUS // `-`
   , ASTERISK // `*`
-  , DIV // `/`
+  , DIVIDE // `/`
   , PERCENT // `%`
   , CONCAT // `||`
   , LEFT_PAREN // `(`

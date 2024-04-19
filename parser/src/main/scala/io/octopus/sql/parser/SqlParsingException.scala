@@ -1,7 +1,7 @@
 package io.octopus.sql.parser
 
 case class SqlParsingException(message: String, cause: Throwable, position: Position) extends RuntimeException(message, cause) {
-  override def getMessage: String = s"error at line ${position.getLineNumber}:${position.getColumnNumber}: ${this.message}"
+  override def getMessage: String = s"error at line [${position.getLineNumber}:${position.getColumnNumber}] = ${this.message}"
 }
 
 object SqlParsingException {

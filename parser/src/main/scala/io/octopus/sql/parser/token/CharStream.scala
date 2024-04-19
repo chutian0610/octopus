@@ -28,6 +28,21 @@ case class CharStream(text: String, var current: Int, var line: Int, var column:
     }
   }
 
+  def next(n: Int):Option[String] ={
+    val list = List.newBuilder[Char]
+    for (i <- 0 until n) {
+      val c= next
+      if(c.isDefined){
+        list.addOne(c.get)
+      }
+    }
+    if(list.result().isEmpty){
+      None
+    }else{
+      Some(list.result().mkString(""))
+    }
+    
+  }
   def peekCharsWhile(predicate: Char => Boolean): String = {
     val stringBuilder = new StringBuilder()
     breakable {

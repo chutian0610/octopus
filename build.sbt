@@ -27,6 +27,7 @@ lazy val parser = (project in file("parser"))
       ,guava
       ,scalaLogging
       ,slf4jSimple
+      ,enumeratum
     )
   )
 lazy val benchmark = (project in file("benchmark"))

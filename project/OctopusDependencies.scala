@@ -4,6 +4,7 @@ object OctopusDependencies {
     val scalatest = "org.scalatest" %% "scalatest" % "3.2.17" % "test"
     val fastparse = "com.lihaoyi" %% "fastparse" % "3.0.2"
     val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
+    val enumeratum =  "com.beachape" %% "enumeratum" % "1.7.3"
 
     //  ========================= not scala based lib =================================
     val antlr4 = "org.antlr" % "antlr4-runtime" %  "4.13.1"
