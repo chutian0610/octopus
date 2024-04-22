@@ -11,7 +11,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     assert(expect == e.getMessage)
   }
 
-  "tokenizer select 1" should "success" in{
+  "tokenizer select int" should "success" in{
     val sql = "SELECT 1"
     val sqlDialect = PrestoDB()
     val tokenizer = SqlTokenizer(sqlDialect)
@@ -21,6 +21,43 @@ class SqlTokenizerTest extends AnyFlatSpec {
       tokenizer.buildWord("SELECT",None),
       Tokens.space,
       Tokens.number("1",false)
+    )))
+  }
+  "tokenizer select long" should "success" in {
+    val sql = "SELECT 1L"
+    val sqlDialect = PrestoDB()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      tokenizer.buildWord("SELECT", None),
+      Tokens.space,
+      Tokens.number("1", true)
+    )))
+  }
+
+  "tokenizer select float" should "success" in {
+    val sql = "SELECT .1"
+    val sqlDialect = PrestoDB()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      tokenizer.buildWord("SELECT", None),
+      Tokens.space,
+      Tokens.number(".1", false)
+    )))
+  }
+  "tokenizer select double" should "success" in {
+    val sql = "SELECT 1.1"
+    val sqlDialect = PrestoDB()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      tokenizer.buildWord("SELECT", None),
+      Tokens.space,
+      Tokens.number("1.1", false)
     )))
   }
 }

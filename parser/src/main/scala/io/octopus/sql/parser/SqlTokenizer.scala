@@ -143,7 +143,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
               }
               return Right(buildWord(sb.toString(), None))
             }
-            val isLong = if(chars.peek.contains("L")){
+            val isLong = if(chars.peek.contains('L')){
               chars.next
               true
             }else false
