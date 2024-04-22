@@ -6,7 +6,7 @@ import io.octopus.sql.parser.token.{CharStream, Token, TokenStream, TokenType, T
 import io.octopus.sql.utils.Engine.MYSQL
 
 class SqlTokenizer(sqlDialect: SqlDialect) {
-  def tokenize(sql: String): Either[SqlParsingException, TokenStream] = {
+  def tokenizeWithPosition(sql: String): Either[SqlParsingException, TokenStream[TokenWithPosition]] = {
     val chars = CharStream(sql)
     val tokens = List.newBuilder[TokenWithPosition]
 
@@ -21,6 +21,21 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
     token match
       case Left(exception) => Left(SqlParsingException(exception, position))
       case Right(value) => Right(TokenStream(tokens.result()))
+  }
+
+  def tokenize(sql: String): Either[SqlParsingException, TokenStream[Token]] = {
+    val chars = CharStream(sql)
+    val tokens = List.newBuilder[Token]
+
+    var token = nextToken(chars)
+    while (token.isRight && !token.contains(Tokens.eof)) {
+      tokens.addOne((token.toOption.get))
+      token = nextToken(chars)
+    }
+
+    token match
+      case Right(value) => Right(TokenStream(tokens.result()))
+      case Left(exception) => Left(exception)
   }
 
   def nextToken(chars: CharStream): Either[SqlParsingException, Token] = {
@@ -43,7 +58,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
             chars.peek match
               // X'...' =>  <binary string literal>
               case Some('\'') => {
-                scanQuotedString(chars, '\'').map(s=> Right(Tokens.hexString(s)))
+                scanQuotedString(chars, '\'').map(s=> Tokens.hexString(s))
               }
               //  identifier | KeyWord starting with an "X"
               case _ => {
@@ -52,27 +67,31 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
           }
           // single quoted string
           case '\'' => {
-            scanQuotedString(chars, '\'').map(s => Right(Tokens.naturalString(s,'\'')))
+            scanQuotedString(chars, '\'').map(s => Tokens.naturalString(s,'\''))
           }
           // double quoted string
           case ch@('"') if !sqlDialect.startOfQuotedIdentifier(ch) && !sqlDialect.startOfIdentifier(ch) => {
-            scanQuotedString(chars, '\'').map(s => Right(Tokens.naturalString(s,'"')))
+            scanQuotedString(chars, '\'').map(s => Tokens.naturalString(s,'"'))
           }
           // quoted identifier
-          case quote_start if sqlDialect.startOfIdentifier(quote_start) => {
+          case quote_start if sqlDialect.startOfDelimitedIdentifier(quote_start) => {
             chars.next // consume the opening quote
-            Word.matchingEndQuote(quote_start).map(quote_end => {
-              scanQuotedIdentifier(chars, quote_end).map((s,end)=>{
-                if (end.contains(quote_end)) {
-                  Right(buildWord(s, end))
-                }else{
-                  Left(SqlParsingException(s"Expected close delimiter '${quote_end}' before EOF."))
+            val quote_end = Word.matchingEndQuote(quote_start)
+            quote_end match
+              case Right(end) => {
+                scanQuotedIdentifier(chars, end) match
+                  case Right((s,end)) if end.contains(quote_end) => {
+                    Right(buildWord(s, end))
+                  }
+                  case Right((s, end)) => {
+                    Left(SqlParsingException(s"Expected close delimiter '${quote_end}' before EOF."))
+                  }
+                  case Left(exception) => Left(exception)
                 }
-              })
-            })
+              case Left(exception) => Left(exception)
           }
           // number
-          case n if (0 to 9 contains n) || n == '.' => {
+          case n if ('0' to '9' contains n) || n == '.' => {
             val sb = new StringBuilder()
             val s = chars.peekCharsWhile(x => CharMatcher.digit().matches(x))
             sb.append(s)
@@ -209,12 +228,14 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
           case ':' => consumeAndReturn(chars,Tokens.colon)
           case ';' => consumeAndReturn(chars, Tokens.semiColon)
           case '?' => consumeAndReturn(chars,Tokens.question)
-          case ch if sqlDialect.startOfIdentifier(ch) => Right(buildWord(scanWord(ch, chars), None))
+          case ch if sqlDialect.startOfIdentifier(ch) => {
+            chars.next
+            Right(buildWord(scanWord(ch, chars), None))
+          }
         }
       }
-      case None => Tokens.eof
+      case None => Right(Tokens.eof)
     }
-    ???
   }
 
   private def consumeAndReturn(chars: CharStream, t: Token): Either[SqlParsingException, Token] = {
@@ -222,7 +243,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
     Right(t)
   }
 
-  private def buildWord(text: String, quote: Option[Char]): Token = {
+  def buildWord(text: String, quote: Option[Char]): Token = {
     sqlDialect.matchKeyWord(text) match
       case Some(keyword) => {
         Tokens.keyWord(text)

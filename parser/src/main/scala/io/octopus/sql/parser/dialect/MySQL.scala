@@ -29,5 +29,7 @@ class MySQL extends SqlDialect(engine = MYSQL) {
     c == '`'
   }
 
+  override def startOfDelimitedIdentifier(c: Char): Boolean = c == '`'
+
   override def matchKeyWord(s: String): Option[String] = ???
 }

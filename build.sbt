@@ -64,6 +64,6 @@ lazy val compilerOptions = Seq(
   "-feature",
   "-language:existentials",
   "-language:implicitConversions",
-  "-unchecked",
-  "-explain"
+  "-unchecked"
+//  "-explain"
 )

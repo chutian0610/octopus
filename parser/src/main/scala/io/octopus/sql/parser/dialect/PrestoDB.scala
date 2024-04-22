@@ -14,6 +14,10 @@ class PrestoDB extends SqlDialect(engine = PRESTO_DB) {
       || c == ':'
   }
 
+  override def startOfDelimitedIdentifier(c: Char):Boolean ={
+    (c == '"') || (c == '`')
+  }
+
   override def startOfIdentifier(c: Char): Boolean = {
     CharMatcher.javaLetterOrDigit().matches(c)
       || c == '_'
