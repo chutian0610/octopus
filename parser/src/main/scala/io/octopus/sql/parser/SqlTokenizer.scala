@@ -117,7 +117,9 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
             val exponent_part = new StringBuilder()
             if(chars.peek.exists(x => x == 'e' || x == 'E')){
               val chars_clone = chars.copy()
-              exponent_part.append(chars_clone.next)
+              chars_clone.next match
+                case Some(x) => exponent_part.append(x)
+                case _ =>
               chars_clone.peek match {
                 case Some(x) if x == '+' || x == '-' => {
                   exponent_part.append(x)

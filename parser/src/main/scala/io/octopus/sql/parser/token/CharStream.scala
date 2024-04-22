@@ -9,8 +9,8 @@ case class CharStream(text: String, var current: Int, var line: Int, var column:
 
   def next: Option[Char] = {
     if (current < text.length) {
-      current += 1
       val c = text.lift(current)
+      current += 1
       c match {
         case Some(c) => {
           if (c == '\n') {
