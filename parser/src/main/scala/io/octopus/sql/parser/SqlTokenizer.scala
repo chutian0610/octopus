@@ -2,7 +2,7 @@ package io.octopus.sql.parser
 
 import com.google.common.base.CharMatcher
 import io.octopus.sql.parser.dialect.SqlDialect
-import io.octopus.sql.parser.token.{CharStream, Token, TokenStream, TokenType, TokenWithPosition, Tokens, Word}
+import io.octopus.sql.parser.token.*
 import io.octopus.sql.utils.Engine.MYSQL
 
 class SqlTokenizer(sqlDialect: SqlDialect) {
@@ -29,7 +29,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
 
     var token = nextToken(chars)
     while (token.isRight && !token.contains(Tokens.eof)) {
-      tokens.addOne((token.toOption.get))
+      tokens.addOne(token.toOption.get)
       token = nextToken(chars)
     }
 
@@ -38,7 +38,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
       case Left(exception) => Left(exception)
   }
 
-  def nextToken(chars: CharStream): Either[SqlParsingException, Token] = {
+  private def nextToken(chars: CharStream): Either[SqlParsingException, Token] = {
     chars.peek match {
       case Some(c) => {
         c match {
@@ -70,7 +70,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
             scanQuotedString(chars, '\'').map(s => Tokens.naturalString(s,'\''))
           }
           // double quoted string
-          case ch@('"') if !sqlDialect.startOfQuotedIdentifier(ch) && !sqlDialect.startOfIdentifier(ch) => {
+          case ch@'"' if !sqlDialect.startOfQuotedIdentifier(ch) && !sqlDialect.startOfIdentifier(ch) => {
             scanQuotedString(chars, '\'').map(s => Tokens.naturalString(s,'"'))
           }
           // quoted identifier
@@ -84,7 +84,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
                     Right(buildWord(s, end))
                   }
                   case Right((s, end)) => {
-                    Left(SqlParsingException(s"Expected close delimiter '${quote_end}' before EOF."))
+                    Left(SqlParsingException(s"Expected close delimiter '$quote_end' before EOF."))
                   }
                   case Left(exception) => Left(exception)
                 }
@@ -100,7 +100,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
               chars.next // consumer 'x'
               val s2 = chars.peekCharsWhile(x => CharMatcher.digit()
                 .and(CharMatcher.inRange('a', 'z'))
-                .and(CharMatcher.inRange('A', 'Z')).matches(x));
+                .and(CharMatcher.inRange('A', 'Z')).matches(x))
               return Right(Tokens.hexString(s2))
             }
             // match decimal point
@@ -207,7 +207,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
               }
               case oc => {
                 val result = "" + '!' + oc.getOrElse("")
-                Left(SqlParsingException(s"Expected '!=' but found ${result}"))
+                Left(SqlParsingException(s"Expected '!=' but found $result"))
               }
             }
           }
@@ -268,7 +268,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
         nested +=1
       }
       if ((""+last_ch + ch.get) == suffix){
-        nested -= 1;
+        nested -= 1
         if(nested ==0) return Right(sb.toString())
       }
       sb.append(ch)
