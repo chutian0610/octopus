@@ -11,6 +11,19 @@ class SqlTokenizerTest extends AnyFlatSpec {
     assert(expect == e.getMessage)
   }
 
+  "tokenizer select quote identifier" should "success" in {
+    val sql = "SELECT \"select\""
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.identifier("select", Some('"'))
+    )))
+  }
+
   "tokenizer select int" should "success" in{
     val sql = "SELECT 1"
     val sqlDialect = Octopus()

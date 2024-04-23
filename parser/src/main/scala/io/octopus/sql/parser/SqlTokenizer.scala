@@ -80,11 +80,11 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
             quote_end match
               case Right(end) => {
                 scanQuotedIdentifier(chars, end) match
-                  case Right((s,end)) if end.contains(quote_end) => {
-                    Right(buildWord(s, end))
+                  case Right((s,actualEnd)) if actualEnd.contains(end) => {
+                    Right(buildWord(s, actualEnd))
                   }
-                  case Right((s, end)) => {
-                    Left(SqlParsingException(s"Expected close delimiter '$quote_end' before EOF."))
+                  case Right((s, actualEnd)) => {
+                    Left(SqlParsingException(s"Expected close delimiter '$end' before EOF."))
                   }
                   case Left(exception) => Left(exception)
                 }
@@ -246,13 +246,18 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
   }
 
   def buildWord(text: String, quote: Option[Char]): Token = {
-    sqlDialect.matchKeyWord(text) match
-      case Some(keyword) => {
-        Tokens.keyWord(text)
+    quote match
+      case Some(quote) => Tokens.identifier(text, Some(quote))
+      case _ =>{
+        sqlDialect.matchKeyWord(text) match
+          case Some(keyword) => {
+            Tokens.keyWord(text)
+          }
+          case None => {
+            Tokens.identifier(text, quote)
+          }
       }
-      case None => {
-        Tokens.identifier(text, quote)
-      }
+
   }
 
   private def scanSingleLineComment(chars: CharStream): Either[SqlParsingException, String] = {
@@ -291,7 +296,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
           case Some(c) if c == quoteEnd => {
             // escape mode
             chars.next // consume escaped char
-            sb.append(ch)
+            sb.append(ch.get)
           }
           case _ => {
             lastChar = Some(quoteEnd)
@@ -300,7 +305,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
         }
       }
       else {
-        sb.append(ch)
+        sb.append(ch.get)
       }
       ch = chars.next
     }
