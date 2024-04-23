@@ -1,6 +1,6 @@
 package io.octopus.sql.parser
 
-import io.octopus.sql.parser.dialect.PrestoDB
+import io.octopus.sql.parser.dialect.{Octopus, PrestoDB}
 import io.octopus.sql.parser.token.{TokenStream, Tokens}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -13,7 +13,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
 
   "tokenizer select int" should "success" in{
     val sql = "SELECT 1"
-    val sqlDialect = PrestoDB()
+    val sqlDialect = Octopus()
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
@@ -25,7 +25,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
   }
   "tokenizer select long" should "success" in {
     val sql = "SELECT 1L"
-    val sqlDialect = PrestoDB()
+    val sqlDialect = Octopus()
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
@@ -38,7 +38,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
 
   "tokenizer select float" should "success" in {
     val sql = "SELECT .1"
-    val sqlDialect = PrestoDB()
+    val sqlDialect = Octopus()
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
@@ -50,7 +50,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
   }
   "tokenizer select double" should "success" in {
     val sql = "SELECT 1.1"
-    val sqlDialect = PrestoDB()
+    val sqlDialect = Octopus()
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
@@ -63,7 +63,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
 
   "tokenizer select exponent" should "success" in {
     val sql = "SELECT 1e10, 1e-10, 1e+10, 1ea, 1e-10a, 1e-10-10"
-    val sqlDialect = PrestoDB()
+    val sqlDialect = Octopus()
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
@@ -92,4 +92,36 @@ class SqlTokenizerTest extends AnyFlatSpec {
       Tokens.number("10", false)
     )))
   }
+  "tokenizer scalar function" should "success" in {
+    val sql = "SELECT sqrt(1)"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      tokenizer.buildWord("SELECT", None),
+      Tokens.space,
+      tokenizer.buildWord("sqrt", None),
+      Tokens.leftParen,
+      Tokens.number("1", false),
+      Tokens.rightParen
+    )))
+  }
+  "tokenizer string concat" should "success" in {
+    val sql = "SELECT 'a' || 'b'"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      tokenizer.buildWord("SELECT", None),
+      Tokens.space,
+      Tokens.naturalString("a",'\''),
+      Tokens.space,
+      Tokens.concat,
+      Tokens.space,
+      Tokens.naturalString("b",'\'')
+    )))
+  }
+
 }

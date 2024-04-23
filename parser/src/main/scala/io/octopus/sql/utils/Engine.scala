@@ -1,6 +1,6 @@
 package io.octopus.sql.utils
 enum Engine{
-  case PRESTO_DB, MYSQL, STARROCKS
+  case OCTOPUS,PRESTO_DB, MYSQL, STARROCKS
 }
 
 sealed trait Version{
