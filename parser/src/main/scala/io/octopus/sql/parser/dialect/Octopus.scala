@@ -30,6 +30,8 @@ class Octopus extends SqlDialect(engine = OCTOPUS) {
   override def matchKeyWord(s: String): Option[String] = {
     KeyWords.withNameInsensitiveOption(s).map(x=>x.entryName)
   }
+
+  override def matchReservedWords(s: String): Option[String] = ???
 }
 
 object Octopus:

@@ -3,8 +3,11 @@ package io.octopus.sql.parser.dialect
 import com.google.common.base.CharMatcher
 import io.octopus.sql.utils.Engine.PRESTO_DB
 import enumeratum.*
-import io.octopus.sql.parser.dialect.PrestoDB.KeyWords
+import io.octopus.sql.parser.dialect.PrestoDB.{KeyWords, ReversedKeyWords}
 
+/**
+ * @see https://prestodb.io/docs/current/language/reserved.html
+ */
 class PrestoDB extends SqlDialect(engine = PRESTO_DB) {
 
   override def partOfIdentifier(c: Char): Boolean = {
@@ -29,6 +32,11 @@ class PrestoDB extends SqlDialect(engine = PRESTO_DB) {
 
   override def matchKeyWord(s: String): Option[String] = {
     KeyWords.withNameInsensitiveOption(s).map(x=>x.entryName)
+  }
+
+
+  override def matchReservedWords(s: String): Option[String] = {
+    ReversedKeyWords.withNameInsensitiveOption(s).map(x=>x.entryName)
   }
 }
 
@@ -246,4 +254,79 @@ object PrestoDB:
     case object ZONE extends KeyWord("ZONE")
   }
 
+  sealed trait ReversedKeyWord(override val entryName: String) extends EnumEntry
+
+  object ReversedKeyWords extends Enum[ReversedKeyWord] {
+    val values: IndexedSeq[ReversedKeyWord] = findValues
+
+    case object ADD extends ReversedKeyWord("ADD")
+    case object ALTER extends ReversedKeyWord("ALTER")
+    case object AS extends ReversedKeyWord("AS")
+    case object BETWEEN extends ReversedKeyWord("BETWEEN")
+    case object BY extends ReversedKeyWord("BY")
+    case object CASE extends ReversedKeyWord("CASE")
+    case object CAST extends ReversedKeyWord("CAST")
+    case object CONSTRAINT extends ReversedKeyWord("CONSTRAINT")
+    case object CREATE extends ReversedKeyWord("CREATE")
+    case object CROSS extends ReversedKeyWord("CROSS")
+    case object CUBE extends ReversedKeyWord("CUBE")
+    case object CURRENT_DATE extends ReversedKeyWord("CURRENT_DATE")
+    case object CURRENT_TIME extends ReversedKeyWord("CURRENT_TIME")
+    case object CURRENT_TIMESTAMP extends ReversedKeyWord("CURRENT_TIMESTAMP")
+    case object CURRENT_USER extends ReversedKeyWord("CURRENT_USER")
+    case object DEALLOCATE extends ReversedKeyWord("DEALLOCATE")
+    case object DELETE extends ReversedKeyWord("DELETE")
+    case object DESCRIBE extends ReversedKeyWord("DESCRIBE")
+    case object DISTINCT extends ReversedKeyWord("DISTINCT")
+    case object DROP extends ReversedKeyWord("DROP")
+    case object ELSE extends ReversedKeyWord("ELSE")
+    case object END extends ReversedKeyWord("END")
+    case object ESCAPE extends ReversedKeyWord("ESCAPE")
+    case object EXCEPT extends ReversedKeyWord("EXCEPT")
+    case object EXECUTE extends ReversedKeyWord("EXECUTE")
+    case object EXISTS extends ReversedKeyWord("EXISTS")
+    case object EXTRACT extends ReversedKeyWord("EXTRACT")
+    case object FALSE extends ReversedKeyWord("FALSE")
+    case object FOR extends ReversedKeyWord("FOR")
+    case object FROM extends ReversedKeyWord("FROM")
+    case object FULL extends ReversedKeyWord("FULL")
+    case object GROUP extends ReversedKeyWord("GROUP")
+    case object GROUPING extends ReversedKeyWord("GROUPING")
+    case object HAVING extends ReversedKeyWord("HAVING")
+    case object IN extends ReversedKeyWord("IN")
+    case object INNER extends ReversedKeyWord("INNER")
+    case object INSERT extends ReversedKeyWord("INSERT")
+    case object INTERSECT extends ReversedKeyWord("INTERSECT")
+    case object INTO extends ReversedKeyWord("INTO")
+    case object IS extends ReversedKeyWord("IS")
+    case object JOIN extends ReversedKeyWord("JOIN")
+    case object LEFT extends ReversedKeyWord("LEFT")
+    case object LIKE extends ReversedKeyWord("LIKE")
+    case object LOCALTIME extends ReversedKeyWord("LOCALTIME")
+    case object LOCALTIMESTAMP extends ReversedKeyWord("LOCALTIMESTAMP")
+    case object NATURAL extends ReversedKeyWord("NATURAL")
+    case object NORMALIZE extends ReversedKeyWord("NORMALIZE")
+    case object NOT extends ReversedKeyWord("NOT")
+    case object NULL extends ReversedKeyWord("NULL")
+    case object ON extends ReversedKeyWord("ON")
+    case object OR extends ReversedKeyWord("OR")
+    case object ORDER extends ReversedKeyWord("ORDER")
+    case object OUTER extends ReversedKeyWord("OUTER")
+    case object PREPARE extends ReversedKeyWord("PREPARE")
+    case object RECURSIVE extends ReversedKeyWord("RECURSIVE")
+    case object RIGHT extends ReversedKeyWord("RIGHT")
+    case object ROLLUP extends ReversedKeyWord("ROLLUP")
+    case object SELECT extends ReversedKeyWord("SELECT")
+    case object TABLE extends ReversedKeyWord("TABLE")
+    case object THEN extends ReversedKeyWord("THEN")
+    case object TRUE extends ReversedKeyWord("TRUE")
+    case object UESCAPE extends ReversedKeyWord("UESCAPE")
+    case object UNION extends ReversedKeyWord("UNION")
+    case object UNNEST extends ReversedKeyWord("UNNEST")
+    case object USING extends ReversedKeyWord("USING")
+    case object VALUES extends ReversedKeyWord("VALUES")
+    case object WHEN extends ReversedKeyWord("WHEN")
+    case object WHERE extends ReversedKeyWord("WHERE")
+    case object WITH extends ReversedKeyWord("WITH")
+  }
 end PrestoDB

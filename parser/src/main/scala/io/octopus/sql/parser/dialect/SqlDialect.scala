@@ -17,4 +17,6 @@ abstract class SqlDialect(engine: Engine
   def startOfQuotedIdentifier(c: Char):Boolean
 
   def matchKeyWord(s: String): Option[String]
+
+  def matchReservedWords(s :String): Option[String]
 }

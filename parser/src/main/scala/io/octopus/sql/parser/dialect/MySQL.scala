@@ -7,6 +7,7 @@ import io.octopus.sql.utils.Engine.{MYSQL, PRESTO_DB}
 /**
  *
  * @see https://dev.mysql.com/doc/refman/8.0/en/identifiers.html.
+ * @see https://dev.mysql.com/doc/refman/8.0/en/keywords.html
  */
 class MySQL extends SqlDialect(engine = MYSQL) {
 
@@ -32,4 +33,6 @@ class MySQL extends SqlDialect(engine = MYSQL) {
   override def startOfDelimitedIdentifier(c: Char): Boolean = c == '`'
 
   override def matchKeyWord(s: String): Option[String] = ???
+
+  override def matchReservedWords(s: String): Option[String] = ???
 }
