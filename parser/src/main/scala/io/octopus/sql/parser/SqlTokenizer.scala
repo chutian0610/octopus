@@ -64,8 +64,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
                 chars.next
                 chars.peek match
                   case Some('\'') => {
-                    scanQuotedString(chars, '\'')
-                      .map(s => Tokens.unicodeString(s, '\''))
+                    scanQuotedString(chars, '\'').map(s => Tokens.unicodeString(s, '\''))
                   }
                   case oc => Left(SqlParsingException(s"Expected ' after ${u}&,but found $oc."))
               }
