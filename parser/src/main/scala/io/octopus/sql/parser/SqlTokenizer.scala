@@ -3,7 +3,9 @@ package io.octopus.sql.parser
 import com.google.common.base.CharMatcher
 import io.octopus.sql.parser.dialect.SqlDialect
 import io.octopus.sql.parser.token.*
-import io.octopus.sql.utils.Engine.MYSQL
+import io.octopus.sql.utils.Engine.{MYSQL, PRESTO_DB}
+
+import scala.util.control.Breaks.{break, breakable}
 
 class SqlTokenizer(sqlDialect: SqlDialect) {
   def tokenizeWithPosition(sql: String): Either[SqlParsingException, TokenStream[TokenWithPosition]] = {
@@ -52,26 +54,44 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
             }
             Right(Tokens.newLine)
           }
+          /* Presto use U&'Hello winter \2603 !' or U&'Hello winter #2603 !' UESCAPE '#'
+           * to represent `Hello winter \u2603 !`
+           */
+          case u@('U' | 'u') if sqlDialect.dialectOf(PRESTO_DB) => {
+            chars.next
+            chars.peek match
+              case Some('&') => {
+                chars.next
+                chars.peek match
+                  case Some('\'') => {
+                    scanQuotedString(chars, '\'')
+                      .map(s => Tokens.unicodeString(s, '\''))
+                  }
+                  case oc => Left(SqlParsingException(s"Expected ' after ${u}&,but found $oc."))
+              }
+              //  identifier | KeyWord starting with `u|U`
+              case _ => Right(buildWord(scanWord(u, chars), None))
+          }
           // hex String
           case x@('X' | 'x') => {
             chars.next
             chars.peek match
               // X'...' =>  <binary string literal>
               case Some('\'') => {
-                scanQuotedString(chars, '\'').map(s=> Tokens.hexString(s))
+                scanQuotedString(chars, '\'').map(s => Tokens.hexString(s))
               }
-              //  identifier | KeyWord starting with an "X"
+              //  identifier | KeyWord starting with an `x|X`
               case _ => {
-                Right(buildWord(scanWord(x, chars),None))
+                Right(buildWord(scanWord(x, chars), None))
               }
           }
           // single quoted string
           case '\'' => {
-            scanQuotedString(chars, '\'').map(s => Tokens.naturalString(s,'\''))
+            scanQuotedString(chars, '\'').map(s => Tokens.naturalString(s, '\''))
           }
           // double quoted string
           case ch@'"' if !sqlDialect.startOfDelimitedIdentifier(ch) && !sqlDialect.startOfIdentifier(ch) => {
-            scanQuotedString(chars, '"').map(s => Tokens.naturalString(s,'"'))
+            scanQuotedString(chars, '"').map(s => Tokens.naturalString(s, '"'))
           }
           // quoted identifier
           case quote_start if sqlDialect.startOfDelimitedIdentifier(quote_start) => {
@@ -80,14 +100,14 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
             quote_end match
               case Right(end) => {
                 scanQuotedIdentifier(chars, end) match
-                  case Right((s,actualEnd)) if actualEnd.contains(end) => {
+                  case Right((s, actualEnd)) if actualEnd.contains(end) => {
                     Right(buildWord(s, actualEnd))
                   }
                   case Right((s, actualEnd)) => {
                     Left(SqlParsingException(s"Expected close delimiter '$end' before EOF."))
                   }
                   case Left(exception) => Left(exception)
-                }
+              }
               case Left(exception) => Left(exception)
           }
           // number
@@ -104,18 +124,18 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
               return Right(Tokens.hexString(s2))
             }
             // match decimal point
-            if(chars.peek.contains('.')){
+            if (chars.peek.contains('.')) {
               sb.append(".")
               chars.next
             }
             sb.append(chars.peekCharsWhile(x => CharMatcher.digit().matches(x)))
             // maybe is '.'
-            if(sb.toString() ==  "."){
+            if (sb.toString() == ".") {
               return Right(Tokens.dot)
             }
             // parse exponent
             val exponent_part = new StringBuilder()
-            if(chars.peek.exists(x => x == 'e' || x == 'E')){
+            if (chars.peek.exists(x => x == 'e' || x == 'E')) {
               val chars_clone = chars.copy()
               chars_clone.next match
                 case Some(x) => exponent_part.append(x)
@@ -129,40 +149,40 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
               }
               chars_clone.peek match
                 case Some(x) if CharMatcher.digit().matches(x) => {
-                    // skip exponent
-                    chars.next(exponent_part.size)
-                    exponent_part.append(chars.peekCharsWhile(x => CharMatcher.digit().matches(x)))
-                    sb.append(exponent_part)
+                  // skip exponent
+                  chars.next(exponent_part.size)
+                  exponent_part.append(chars.peekCharsWhile(x => CharMatcher.digit().matches(x)))
+                  sb.append(exponent_part)
                 }
                 case _ =>
             }
             // mysql dialect supports identifiers that start with a numeric prefix,
             // as long as they aren't an exponent number.
-            if(sqlDialect.dialectOf(MYSQL) && exponent_part.isEmpty){
-              val word = chars.peekCharsWhile(x=>sqlDialect.partOfIdentifier(x))
-              if(word.nonEmpty){
+            if (sqlDialect.dialectOf(MYSQL) && exponent_part.isEmpty) {
+              val word = chars.peekCharsWhile(x => sqlDialect.partOfIdentifier(x))
+              if (word.nonEmpty) {
                 sb.append(word)
               }
               return Right(buildWord(sb.toString(), None))
             }
-            val isLong = if(chars.peek.contains('L')){
+            val isLong = if (chars.peek.contains('L')) {
               chars.next
               true
-            }else false
+            } else false
             Right(Tokens.number(sb.toString(), isLong))
           }
           // punctuation
           case '(' => consumeAndReturn(chars, Tokens.leftParen)
           case ')' => consumeAndReturn(chars, Tokens.rightParen)
           case ',' => consumeAndReturn(chars, Tokens.comma)
-          case '-' =>{
+          case '-' => {
             chars.next // consume '-'
             chars.peek match {
               case Some(c) if c == '-' => {
                 //  single-line comment
                 chars.next // consume '-'
                 // single line comment starts with `--`
-                scanSingleLineComment(chars).map(comment => Tokens.singleLineComment(comment,"--"))
+                scanSingleLineComment(chars).map(comment => Tokens.singleLineComment(comment, "--"))
               }
               case Some(c) if c == '>' => {
                 chars.next // consume '>'
@@ -194,13 +214,13 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
                 Right(Tokens.concat)
               }
               case oc => {
-                val result = ""+'|'+oc.getOrElse("")
+                val result = "" + '|' + oc.getOrElse("")
                 Left(SqlParsingException(s"Expected String Concat but found $result"))
               }
             }
           }
           case '=' => consumeAndReturn(chars, Tokens.eq)
-          case '!' =>{
+          case '!' => {
             chars.next // consume '!'
             chars.peek match {
               case Some(c) if c == '=' => {
@@ -227,9 +247,9 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
               case Some(c) if c == '=' => consumeAndReturn(chars, Tokens.gte)
               case _ => Right(Tokens.gt)
           }
-          case ':' => consumeAndReturn(chars,Tokens.colon)
+          case ':' => consumeAndReturn(chars, Tokens.colon)
           case ';' => consumeAndReturn(chars, Tokens.semiColon)
-          case '?' => consumeAndReturn(chars,Tokens.question)
+          case '?' => consumeAndReturn(chars, Tokens.question)
           case ch if sqlDialect.startOfIdentifier(ch) => {
             chars.next
             Right(buildWord(scanWord(ch, chars), None))
@@ -248,7 +268,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
   def buildWord(text: String, quote: Option[Char]): Token = {
     quote match
       case Some(quote) => Tokens.identifier(text, Some(quote))
-      case _ =>{
+      case _ => {
         sqlDialect.matchKeyWord(text) match
           case Some(keyword) => {
             Tokens.keyWord(text)
@@ -261,29 +281,33 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
   }
 
   private def scanSingleLineComment(chars: CharStream): Either[SqlParsingException, String] = {
-    val sb = new StringBuilder()
-    val comment = chars.peekCharsWhile(x => x != '\n')
+    var comment = chars.peekCharsWhile(x => x != '\n')
+    if (chars.peek.contains('\n')) {
+      chars.next
+      comment = comment + '\n'
+    }
     Right(comment)
   }
-  private def scanMultiLineComment(chars: CharStream, prefix: String ,suffix :String): Either[SqlParsingException, String] = {
+
+  private def scanMultiLineComment(chars: CharStream, prefix: String, suffix: String): Either[SqlParsingException, String] = {
     val sb = new StringBuilder()
     var ch: Option[Char] = chars.next
     var last_ch: Char = ' '
     var nested = 1
     while (ch.isDefined) {
-      if ( ("" + last_ch+ ch.get ) == prefix) {
-        nested +=1
+      if (("" + last_ch + ch.get) == prefix) {
+        nested += 1
       }
-      if ((""+last_ch + ch.get) == suffix){
+      if (("" + last_ch + ch.get) == suffix) {
         nested -= 1
-        if(nested ==0) return Right(sb.toString())
+        if (nested == 0) return Right(sb.substring(0, sb.length - 1))
       }
-      sb.append(ch)
+      sb.append(ch.get)
       last_ch = ch.get
       ch = chars.next
     }
     // incomplete Token
-    Left(SqlParsingException( s"Unexpected EOF while in a multi-line comment:${sb.toString()}"))
+    Left(SqlParsingException(s"Unexpected EOF while in a multi-line comment:${sb.toString()}"))
   }
 
   private def scanQuotedIdentifier(chars: CharStream, quoteEnd: Char): Either[SqlParsingException, (String, Option[Char])] = {
