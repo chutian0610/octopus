@@ -1,6 +1,6 @@
 package io.octopus.sql.parser
 
-import io.octopus.sql.parser.dialect.{Octopus,MySQL}
+import io.octopus.sql.parser.dialect.{MySQL, Octopus, PrestoDB}
 import io.octopus.sql.parser.token.{TokenStream, Tokens}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -9,6 +9,75 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val e = SqlParsingException("test")
     val expect = "error at line [1:1] = test"
     assert(expect == e.getMessage)
+  }
+
+  "tokenizer single line comment" should "success" in {
+    val sql = "SELECT -- begin\n"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.singleLineComment(" begin\n", "--")
+
+    )))
+  }
+  "tokenizer single line comment at eof" should "success" in {
+    val sql = "SELECT -- begin"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.singleLineComment(" begin", "--")
+
+    )))
+  }
+  "tokenizer multi line comment" should "success" in {
+    val sql = "SELECT /*multi-line\n* /comment*/ a"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.multiLineComment("multi-line\n* /comment", "/*","*/"),
+      Tokens.space,
+      Tokens.identifier("a", None)
+    )))
+  }
+  "tokenizer multi line comment with more asterisk" should "success" in {
+    val sql = "SELECT /** Comment **/ a"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.multiLineComment("* Comment *", "/*", "*/"),
+      Tokens.space,
+      Tokens.identifier("a", None)
+    )))
+  }
+  "tokenizer nested multi line comment" should "success" in {
+    val sql = "SELECT /*multi-line\n* \n/* comment \n /*comment*/*/ */ /comment*/ a"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.multiLineComment("multi-line\n* \n/* comment \n /*comment*/*/ */ /comment", "/*", "*/"),
+      Tokens.space,
+      Tokens.identifier("a", None)
+    )))
   }
 
   "tokenizer select single quote string" should "success" in {
@@ -60,6 +129,23 @@ class SqlTokenizerTest extends AnyFlatSpec {
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.naturalString("a\"", '"')
+    )))
+  }
+
+  "tokenizer select unicode string" should "success" in {
+    val sql = "SELECT U&'Hello winter #2603 !' UESCAPE '#'"
+    val sqlDialect = PrestoDB()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.unicodeString("Hello winter #2603 !", '\''),
+      Tokens.space,
+      Tokens.keyWord("UESCAPE"),
+      Tokens.space,
+      Tokens.naturalString("#", '\'')
     )))
   }
 

@@ -54,6 +54,7 @@ object Tokens {
   def percent: Token = Symbol.PERCENT()
   def hexString(text: String): Token = Literal.HexString(text)
   def naturalString(text: String, quote: Char): Token = Literal.NaturalString(text, quote)
+  def unicodeString(text: String, quote: Char): Token = Literal.UnicodeString(text, quote)
   def number(text: String, isLong: Boolean): Token = Literal.Number(text, isLong)
   def identifier(text: String, quote: Option[Char]): Token = Word.Identifier(text, quote)
   def keyWord(text: String): Token = Word.KeyWord(text)
@@ -75,6 +76,7 @@ enum Literal(text: String,
              tokenType: TokenType) extends Token {
   case HexString(text: String, tokenType: TokenType = TokenType.HEX_STRING) extends Literal(text, tokenType)
   case NaturalString(text: String, quote: Char, tokenType: TokenType = TokenType.NATURAL_String) extends Literal(text, tokenType)
+  case UnicodeString(text: String, quote: Char, tokenType: TokenType = TokenType.UNICODE_STRING) extends Literal(text, tokenType)
   case Number(text: String, isLong: Boolean, tokenType: TokenType = TokenType.NUMBER) extends Literal(text, tokenType)
 }
 

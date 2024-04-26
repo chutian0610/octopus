@@ -1,23 +1,22 @@
 package io.octopus.sql.parser.token
 enum TokenType {
   case
-  // Literal
-    HEX_STRING
+  /************** Literal **************/
+    HEX_STRING  // varbinary in hex String format
   , NATURAL_String
+  , UNICODE_STRING // string with unicode char escaped
   , NUMBER
-  // Word
+  /************** Word **************/
   , IDENTIFIER
   , KEYWORD
-  // EOF
-  , EOF
-
-  // WhiteSpace
+  , EOF // EOF
+  /************** WhiteSpace **************/
   , SPACE
   , NEW_LINE
   , TAB
   , SINGLE_LINE_COMMENT
   , MULTI_LINE_COMMENT
-  // Symbol
+  /************** Symbol **************/
   , EQ // `=`
   , NEQ // `<>` or `!=`
   , LT // `<`
