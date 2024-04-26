@@ -5,10 +5,9 @@ import io.octopus.sql.parser.dialect.SqlDialect
 import io.octopus.sql.parser.token.*
 import io.octopus.sql.utils.Engine.{MYSQL, PRESTO_DB}
 
-import scala.util.control.Breaks.{break, breakable}
+class SqlTokenizer(sqlDialect: SqlDialect,sqlParingOption: SqlParingOption = SqlParingOption()) {
 
-class SqlTokenizer(sqlDialect: SqlDialect) {
-  def tokenizeWithPosition(sql: String): Either[SqlParsingException, TokenStream[TokenWithPosition]] = {
+  def tokenizeWithPosition(sql: String): Either[SqlParsingException, TokenStream] = {
     val chars = CharStream(sql)
     val tokens = List.newBuilder[TokenWithPosition]
 
@@ -25,7 +24,7 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
       case Right(value) => Right(TokenStream(tokens.result()))
   }
 
-  def tokenize(sql: String): Either[SqlParsingException, TokenStream[Token]] = {
+  def tokenize(sql: String): Either[SqlParsingException, TokenStream] = {
     val chars = CharStream(sql)
     val tokens = List.newBuilder[Token]
 

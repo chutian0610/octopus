@@ -5,13 +5,17 @@ import io.octopus.sql.parser.{Position, SqlParsingException}
 
 import scala.util.Right
 
-case class TokenWithPosition(token: Token, position: Option[Position]) {
+case class TokenWithPosition(token: Token, position: Option[Position]) extends Token{
   override def toString: String = {
     position match {
       case Some(value) => s"Token($token, $position)"
       case None => s"Token($token)"
     }
   }
+
+  override def tokenType: TokenType = token.tokenType
+
+  override def text: String = token.text
 }
 
 object TokenWithPosition:
@@ -31,6 +35,7 @@ sealed trait Token {
       case word: Word => "Word"
       case symbol: Symbol => "Symbol"
       case whiteSpace: WhiteSpace => "WhiteSpace"
+      case _ => "Other"
     }
     s"\"$text\", $typeCatalog.$tokenType"
   }
