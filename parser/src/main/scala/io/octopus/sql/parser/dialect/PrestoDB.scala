@@ -3,7 +3,6 @@ package io.octopus.sql.parser.dialect
 import com.google.common.base.CharMatcher
 import io.octopus.sql.utils.Engine.PRESTO_DB
 import enumeratum.*
-import io.octopus.sql.parser.dialect.PrestoDB.{KeyWords, ReversedKeyWords}
 
 /**
  * @see https://prestodb.io/docs/current/language/reserved.html
@@ -18,7 +17,7 @@ class PrestoDB extends SqlDialect(engine = PRESTO_DB) {
   }
 
   override def startOfDelimitedIdentifier(c: Char):Boolean ={
-    (c == '"') || (c == '`')
+    c == '"'
   }
 
   override def startOfIdentifier(c: Char): Boolean = {
@@ -26,17 +25,13 @@ class PrestoDB extends SqlDialect(engine = PRESTO_DB) {
       || c == '_'
   }
 
-  override def startOfQuotedIdentifier(c: Char): Boolean = {
-    c == '"'
-  }
-
   override def matchKeyWord(s: String): Option[String] = {
-    KeyWords.withNameInsensitiveOption(s).map(x=>x.entryName)
+    PrestoDB.KeyWords.withNameInsensitiveOption(s).map(x=>x.entryName)
   }
 
 
   override def matchReservedWords(s: String): Option[String] = {
-    ReversedKeyWords.withNameInsensitiveOption(s).map(x=>x.entryName)
+    PrestoDB.ReversedKeyWords.withNameInsensitiveOption(s).map(x=>x.entryName)
   }
 }
 

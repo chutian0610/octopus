@@ -14,8 +14,6 @@ abstract class SqlDialect(engine: Engine
 
   def startOfDelimitedIdentifier(c: Char): Boolean
 
-  def startOfQuotedIdentifier(c: Char):Boolean
-
   def matchKeyWord(s: String): Option[String]
 
   def matchReservedWords(s :String): Option[String]

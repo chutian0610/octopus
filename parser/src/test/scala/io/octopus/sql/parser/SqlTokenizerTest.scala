@@ -1,6 +1,6 @@
 package io.octopus.sql.parser
 
-import io.octopus.sql.parser.dialect.{Octopus, PrestoDB}
+import io.octopus.sql.parser.dialect.{Octopus,MySQL}
 import io.octopus.sql.parser.token.{TokenStream, Tokens}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -11,8 +11,73 @@ class SqlTokenizerTest extends AnyFlatSpec {
     assert(expect == e.getMessage)
   }
 
+  "tokenizer select single quote string" should "success" in {
+    val sql = "SELECT 'a'"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.naturalString("a", '\'')
+    )))
+  }
+  "tokenizer select single quote string with quote escape" should "success" in {
+    val sql = "SELECT 'a'''"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.naturalString("a'", '\'')
+    )))
+  }
+
+
+  "tokenizer select double quote string" should "success" in {
+    val sql = """SELECT "a""""
+    val sqlDialect = MySQL()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.naturalString("a", '"')
+    )))
+  }
+
+  "tokenizer select double quote string with quote escape" should "success" in {
+    val sql = """SELECT "a""""""
+    val sqlDialect = MySQL()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.naturalString("a\"", '"')
+    )))
+  }
+
+  "tokenizer select identifier" should "success" in {
+    val sql = "SELECT a"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.identifier("a", None)
+    )))
+  }
+
   "tokenizer select quote identifier" should "success" in {
-    val sql = "SELECT \"select\""
+    val sql = """SELECT "select""""
     val sqlDialect = Octopus()
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
@@ -154,6 +219,35 @@ class SqlTokenizerTest extends AnyFlatSpec {
       Tokens.keyWord("or"),
       Tokens.space,
       Tokens.keyWord("true")
+    )))
+  }
+
+  "tokenizer simple select" should "success" in {
+    val sql = "SELECT * FROM customer WHERE id = 1 LIMIT 5"
+    val sqlDialect = Octopus()
+    val tokenizer = SqlTokenizer(sqlDialect)
+    val tokens = tokenizer.tokenize(sql)
+    assert(tokens.isRight)
+    assert(tokens.toOption.get == TokenStream(List(
+      Tokens.keyWord("SELECT"),
+      Tokens.space,
+      Tokens.asterisk,
+      Tokens.space,
+      Tokens.keyWord("FROM"),
+      Tokens.space,
+      Tokens.identifier("customer", None),
+      Tokens.space,
+      Tokens.keyWord("WHERE"),
+      Tokens.space,
+      Tokens.identifier("id", None),
+      Tokens.space,
+      Tokens.eq,
+      Tokens.space,
+      Tokens.number("1", false),
+      Tokens.space,
+      Tokens.keyWord("LIMIT"),
+      Tokens.space,
+      Tokens.number("5", false)
     )))
   }
 

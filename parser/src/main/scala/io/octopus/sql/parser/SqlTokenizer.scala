@@ -70,8 +70,8 @@ class SqlTokenizer(sqlDialect: SqlDialect) {
             scanQuotedString(chars, '\'').map(s => Tokens.naturalString(s,'\''))
           }
           // double quoted string
-          case ch@'"' if !sqlDialect.startOfQuotedIdentifier(ch) && !sqlDialect.startOfIdentifier(ch) => {
-            scanQuotedString(chars, '\'').map(s => Tokens.naturalString(s,'"'))
+          case ch@'"' if !sqlDialect.startOfDelimitedIdentifier(ch) && !sqlDialect.startOfIdentifier(ch) => {
+            scanQuotedString(chars, '"').map(s => Tokens.naturalString(s,'"'))
           }
           // quoted identifier
           case quote_start if sqlDialect.startOfDelimitedIdentifier(quote_start) => {
