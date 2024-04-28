@@ -1,6 +1,6 @@
 package io.octopus.sql.parser.token
 
-import io.octopus.sql.parser.token.TokenType.EOF
+import io.octopus.sql.parser.token.TokenType.{EOF, SINGLE_LINE_COMMENT}
 import io.octopus.sql.parser.{Position, SqlParsingException}
 
 import scala.util.Right
@@ -8,8 +8,8 @@ import scala.util.Right
 case class TokenWithPosition(token: Token, position: Option[Position]) extends Token{
   override def toString: String = {
     position match {
-      case Some(value) => s"Token($token, $position)"
-      case None => s"Token($token)"
+      case Some(value) => s"Token[$token, $position]"
+      case None => s"Token[$token]"
     }
   }
 
@@ -30,14 +30,21 @@ sealed trait Token {
   def text: String
 
   override def toString: String = {
-    val typeCatalog = this match {
-      case literal: Literal => "Literal"
-      case word: Word => "Word"
-      case symbol: Symbol => "Symbol"
-      case whiteSpace: WhiteSpace => "WhiteSpace"
-      case _ => "Other"
-    }
-    s"\"$text\", $typeCatalog.$tokenType"
+    this match
+      case singleLineComment: WhiteSpace.SINGLE_LINE_COMMENT =>
+        return s"(text=\"$text\", type=$tokenType,prefix=${singleLineComment.prefix})"
+      case multiLineComment: WhiteSpace.MULTI_LINE_COMMENT =>
+        return s"(text=\"$text\", type=$tokenType,prefix=${multiLineComment.prefix},suffix=${multiLineComment.suffix})"
+      case naturalString: Literal.NaturalString =>
+        return s"(text=\"$text\", type=$tokenType,quote=${naturalString.quote})"
+      case unicodeString: Literal.UnicodeString =>
+        return s"(text=\"$text\", type=$tokenType,quote=${unicodeString.quote})"
+      case number: Literal.Number =>
+        return s"(text=\"$text\", type=$tokenType,isLong=${number.isLong})"
+      case identifier: Word.Identifier if identifier.quote.isDefined=>
+        return s"(text=\"$text\", type=$tokenType,quote=${identifier.quote.get})"
+      case _ =>
+    s"(text=\"$text\", type=$tokenType)"
   }
 }
 
