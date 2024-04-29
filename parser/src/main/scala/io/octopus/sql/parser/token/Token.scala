@@ -80,7 +80,7 @@ object Tokens {
   def space: Token = WhiteSpace.SPACE()
   def tab: Token = WhiteSpace.TAB()
   def newLine: Token = WhiteSpace.NEW_LINE()
-  def eof: Token = WhiteSpace.EOF()
+  def eof: Token = EOF()
   def singleLineComment(text: String, prefix: String): Token = WhiteSpace.SINGLE_LINE_COMMENT(text, prefix)
   def multiLineComment(text: String, prefix: String, suffix: String): Token = WhiteSpace.MULTI_LINE_COMMENT(text, prefix, suffix)
   def leftParen: Token = Symbol.LEFT_PAREN()
@@ -110,6 +110,7 @@ object Tokens {
   def question: Token = Symbol.QUESTION()
 }
 
+case class EOF(text: String = "\u001A", tokenType: TokenType = TokenType.EOF) extends Token
 
 enum Literal(text: String,
              tokenType: TokenType) extends Token {
@@ -142,7 +143,6 @@ enum WhiteSpace(
   case SPACE(text: String = " ", tokenType: TokenType = TokenType.SPACE) extends WhiteSpace(text, tokenType)
   case TAB(text: String = "\t", tokenType: TokenType = TokenType.TAB) extends WhiteSpace(text, tokenType)
   case NEW_LINE(text: String = "\n", tokenType: TokenType = TokenType.NEW_LINE) extends WhiteSpace(text, tokenType)
-  case EOF(text: String = "\u001A", tokenType: TokenType = TokenType.EOF) extends WhiteSpace(text, tokenType)
   case SINGLE_LINE_COMMENT(text: String, prefix: String, tokenType: TokenType = TokenType.SINGLE_LINE_COMMENT) extends WhiteSpace(text, tokenType)
   case MULTI_LINE_COMMENT(text: String, prefix: String, suffix: String, tokenType: TokenType = TokenType.SINGLE_LINE_COMMENT) extends WhiteSpace(text, tokenType)
 }
