@@ -26,8 +26,25 @@ end TokenWithPosition
 
 sealed trait Token {
   def tokenType: TokenType
-
   def text: String
+
+  /**
+   * unwrap the token if token is instance of TokenWithPosition
+   * @return
+   */
+  def unWrap: Token = this match{
+    case tokenWithPosition: TokenWithPosition => tokenWithPosition.token
+    case _ => this
+  }
+  def sameAs(obj: Token): Boolean = {
+    if(obj == null){
+      return false
+    }
+    val unWrapThis = this.unWrap
+    val unWrapThat = obj.unWrap
+
+    unWrapThis.equals(unWrapThat)
+  }
 
   override def toString: String = {
     this match

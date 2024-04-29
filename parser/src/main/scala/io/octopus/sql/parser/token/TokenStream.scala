@@ -1,7 +1,8 @@
 package io.octopus.sql.parser.token
 
-case class TokenStream(tokens: List[Token], var current: Int) {
+import scala.annotation.tailrec
 
+class TokenStream(val tokens: List[Token], var current: Int) {
   /**
    * peek next token
    * @return
@@ -19,6 +20,8 @@ case class TokenStream(tokens: List[Token], var current: Int) {
       }
       t
   }
+
+  def atEnd: Boolean = peek.isEmpty
 
   /**
    * Consume the next token if it matches the expected token, otherwise return false
@@ -54,11 +57,31 @@ case class TokenStream(tokens: List[Token], var current: Int) {
     consumeByTokenType(token.tokenType)
   }
 
-  override def equals(obj: Any): Boolean = obj match
-    case TokenStream(otherTokens, _) => tokens == otherTokens
-    case _ => false
+  /**
+   * compare two token stream, return true if their tokens are same
+   * @param obj the other token stream
+   * @return
+   */
+  def sameAs(obj: TokenStream): Boolean = {
+    @tailrec def listSameAs(a: List[Token], b: List[Token]): Boolean =
+      (a eq b)  // same reference
+        || {    // same content
+        val aEmpty = a == null || a.isEmpty
+        val bEmpty = b == null || b.isEmpty
+        if (!(aEmpty || bEmpty) && a.head.sameAs(b.head)) {
+          listSameAs(a.tail, b.tail)
+        }
+        else {
+          aEmpty && bEmpty
+        }
+      }
+    if(obj eq this){
+      return true
+    }
+    listSameAs(this.tokens, obj.tokens)
+  }
 }
 
 object TokenStream {
-  def apply(tokens: List[Token]): TokenStream = TokenStream(tokens, 0)
+  def apply(tokens: List[Token]): TokenStream =new TokenStream(tokens, 0)
 }

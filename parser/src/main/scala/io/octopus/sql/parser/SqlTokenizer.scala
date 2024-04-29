@@ -13,7 +13,7 @@ class SqlTokenizer(sqlDialect: SqlDialect,sqlParingOption: SqlParingOption = Sql
 
     var position = chars.position
     var token = nextToken(chars)
-    while (token.isRight && !token.contains(Tokens.eof)) {
+    while (token.isRight && !token.exists(x=>x.sameAs(Tokens.eof))) {
       tokens.addOne(TokenWithPosition(token.toOption.get, position))
       position = chars.position
       token = nextToken(chars)
@@ -29,7 +29,7 @@ class SqlTokenizer(sqlDialect: SqlDialect,sqlParingOption: SqlParingOption = Sql
     val tokens = List.newBuilder[Token]
 
     var token = nextToken(chars)
-    while (token.isRight && !token.contains(Tokens.eof)) {
+    while (token.isRight && !token.exists(x=>x.sameAs(Tokens.eof))) {
       tokens.addOne(token.toOption.get)
       token = nextToken(chars)
     }
