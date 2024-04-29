@@ -17,7 +17,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.singleLineComment(" begin\n", "--")
@@ -30,7 +30,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.singleLineComment(" begin", "--")
@@ -43,7 +43,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.multiLineComment("multi-line\n* /comment", "/*","*/"),
@@ -57,7 +57,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.multiLineComment("* Comment *", "/*", "*/"),
@@ -71,7 +71,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.multiLineComment("multi-line\n* \n/* comment \n /*comment*/*/ */ /comment", "/*", "*/"),
@@ -86,7 +86,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.naturalString("a", '\'')
@@ -98,7 +98,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.naturalString("a'", '\'')
@@ -112,7 +112,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.naturalString("a", '"')
@@ -125,7 +125,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.naturalString("a\"", '"')
@@ -138,7 +138,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.unicodeString("Hello winter #2603 !", '\''),
@@ -155,7 +155,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.identifier("a", None)
@@ -168,7 +168,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.identifier("select", Some('"'))
@@ -181,7 +181,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.number("1",false)
@@ -193,7 +193,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.number("1", true)
@@ -206,7 +206,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.number(".1", false)
@@ -218,7 +218,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.number("1.1", false)
@@ -231,7 +231,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.number("1e10", false),
@@ -262,7 +262,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.identifier("sqrt", None),
@@ -277,7 +277,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.naturalString("a",'\''),
@@ -293,7 +293,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.keyWord("true"),
@@ -314,7 +314,7 @@ class SqlTokenizerTest extends AnyFlatSpec {
     val tokenizer = SqlTokenizer(sqlDialect)
     val tokens = tokenizer.tokenize(sql)
     assert(tokens.isRight)
-    assert(tokens.toOption.get sameAs TokenStream(List(
+    assert(tokens.toOption.get sameAs TokenStream.of(List(
       Tokens.keyWord("SELECT"),
       Tokens.space,
       Tokens.asterisk,

@@ -22,6 +22,9 @@ object TokenWithPosition:
   def apply(token: Token, position: Position): TokenWithPosition = {
     TokenWithPosition(token, Some(position))
   }
+  def apply(token: Token): TokenWithPosition = {
+    TokenWithPosition(token, None)
+  }
 end TokenWithPosition
 
 sealed trait Token {
@@ -36,10 +39,17 @@ sealed trait Token {
     case tokenWithPosition: TokenWithPosition => tokenWithPosition.token
     case _ => this
   }
+
+  /**
+   * compare two token, return true if them are same
+   * @param obj the other token
+   * @return
+   */
   def sameAs(obj: Token): Boolean = {
     if(obj == null){
       return false
     }
+    // ignore TokenWithPosition
     val unWrapThis = this.unWrap
     val unWrapThat = obj.unWrap
 

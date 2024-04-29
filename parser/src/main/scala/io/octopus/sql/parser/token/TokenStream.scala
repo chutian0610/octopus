@@ -2,18 +2,18 @@ package io.octopus.sql.parser.token
 
 import scala.annotation.tailrec
 
-class TokenStream(val tokens: List[Token], var current: Int) {
+class TokenStream(val tokens: List[TokenWithPosition], var current: Int) {
   /**
    * peek next token
    * @return
    */
-  def peek: Option[Token] = tokens.lift(current)
+  def peek: Option[TokenWithPosition] = tokens.lift(current)
 
   /**
    * get the next token
    * @return
    */
-  def next: Option[Token] = {
+  def next: Option[TokenWithPosition] = {
       val t= tokens.lift(current)
       if(t.isDefined) {
         current += 1
@@ -21,14 +21,14 @@ class TokenStream(val tokens: List[Token], var current: Int) {
       t
   }
 
-  def atEnd: Boolean = peek.isEmpty
+  def atEnd: Boolean = peek.isEmpty || peek.exists(_.tokenType == TokenType.EOF)
 
   /**
    * Consume the next token if it matches the expected token, otherwise return false
    * @param t the expected token
    * @return
    */
-  def consume(t:Token): Boolean = {
+  def consume(t:TokenWithPosition): Boolean = {
     peek match
       case Some(token) if token == t =>
         next
@@ -83,5 +83,6 @@ class TokenStream(val tokens: List[Token], var current: Int) {
 }
 
 object TokenStream {
-  def apply(tokens: List[Token]): TokenStream =new TokenStream(tokens, 0)
+  def apply(tokens: List[TokenWithPosition]): TokenStream =new TokenStream(tokens, 0)
+  def of(tokens: List[Token]): TokenStream =new TokenStream(tokens.map(TokenWithPosition(_)), 0)
 }
