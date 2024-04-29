@@ -8,11 +8,10 @@ case class CharStream(text: String, var current: Int, var line: Int, var column:
   def peek: Option[Char] = text.lift(current)
 
   def next: Option[Char] = {
-    if (current < text.length) {
       val c = text.lift(current)
-      current += 1
       c match {
         case Some(c) => {
+          current += 1
           if (c == '\n') {
             line += 1
             column = 0
@@ -23,9 +22,6 @@ case class CharStream(text: String, var current: Int, var line: Int, var column:
         case None =>
       }
       c
-    } else {
-      None
-    }
   }
 
   def next(n: Int):Option[String] ={

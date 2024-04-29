@@ -9,6 +9,7 @@ package io.octopus.sql.parser
 case class Position(line: Int, column: Int) {
   def getLineNumber: Int = this.line
   def getColumnNumber: Int = this.column + 1
+  override def toString: String = s"position(${this.getLineNumber}:${this.getColumnNumber})"
 }
 
 object Position{

@@ -8,8 +8,8 @@ import scala.util.Right
 case class TokenWithPosition(token: Token, position: Option[Position]) extends Token{
   override def toString: String = {
     position match {
-      case Some(value) => s"Token[$token, $position]"
-      case None => s"Token[$token]"
+      case Some(value) => s"[$token, $position]"
+      case None => s"[$token]"
     }
   }
 
@@ -32,19 +32,19 @@ sealed trait Token {
   override def toString: String = {
     this match
       case singleLineComment: WhiteSpace.SINGLE_LINE_COMMENT =>
-        return s"(text=\"$text\", type=$tokenType,prefix=${singleLineComment.prefix})"
+        return s"Token(text=\"$text\", type=$tokenType,prefix=${singleLineComment.prefix})"
       case multiLineComment: WhiteSpace.MULTI_LINE_COMMENT =>
-        return s"(text=\"$text\", type=$tokenType,prefix=${multiLineComment.prefix},suffix=${multiLineComment.suffix})"
+        return s"Token(text=\"$text\", type=$tokenType,prefix=${multiLineComment.prefix},suffix=${multiLineComment.suffix})"
       case naturalString: Literal.NaturalString =>
-        return s"(text=\"$text\", type=$tokenType,quote=${naturalString.quote})"
+        return s"Token(text=\"$text\", type=$tokenType,quote=${naturalString.quote})"
       case unicodeString: Literal.UnicodeString =>
-        return s"(text=\"$text\", type=$tokenType,quote=${unicodeString.quote})"
+        return s"Token(text=\"$text\", type=$tokenType,quote=${unicodeString.quote})"
       case number: Literal.Number =>
-        return s"(text=\"$text\", type=$tokenType,isLong=${number.isLong})"
+        return s"Token(text=\"$text\", type=$tokenType,isLong=${number.isLong})"
       case identifier: Word.Identifier if identifier.quote.isDefined=>
-        return s"(text=\"$text\", type=$tokenType,quote=${identifier.quote.get})"
+        return s"Token(text=\"$text\", type=$tokenType,quote=${identifier.quote.get})"
       case _ =>
-    s"(text=\"$text\", type=$tokenType)"
+    s"Token(text=\"$text\", type=$tokenType)"
   }
 }
 
