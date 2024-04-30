@@ -103,23 +103,37 @@ class TokenStream(val tokens: List[TokenWithPosition], var current: Int) {
 
   /**
    * Consume the next token if it matches the expected token Type, otherwise return false
-   * @param t
+   * @param expected the expected token type
    * @return
    */
-  def consumeByTokenType(tokenType: TokenType): Boolean = {
+  def consumeByTokenType(expected: TokenType): Boolean = {
     peek match
-      case Some(token) if token.tokenType == tokenType =>
+      case Some(token) if token.tokenType == expected =>
         next
         true
       case _ =>false
   }
   /**
    * Consume the next token if it matches type of the expected token, otherwise return false
-   * @param t
+   * @param expected the expected token
    * @return
    */
-  def consumeByTokenType(token: Token): Boolean = {
-    consumeByTokenType(token.tokenType)
+  def consumeByTokenType(expected: Token): Boolean = {
+    consumeByTokenType(expected.tokenType)
+  }
+
+  /**
+   * consume the next token if it matches the expected keyword, otherwise return false
+   * @param expected the expected keyword
+   * @return
+   */
+  def consumeKeyWord(expected : KeyWord):Boolean={
+    peek.map(_.unWrap) match
+      case Some(w: Word.KeyWord) if KeyWords.withNameInsensitiveOption(w.text) == expected =>{
+        next
+        true
+      }
+      case _ => false
   }
   /**
    * compare two token stream, return true if their tokens are same
