@@ -263,7 +263,7 @@ class SqlTokenizer(sqlDialect: SqlDialect,sqlParingOption: SqlParingOption = Sql
     Right(t)
   }
 
-  def buildWord(text: String, quote: Option[Char]): Token = {
+  private def buildWord(text: String, quote: Option[Char]): Token = {
     quote match
       case Some(quote) => Tokens.identifier(text, Some(quote))
       case _ => {
