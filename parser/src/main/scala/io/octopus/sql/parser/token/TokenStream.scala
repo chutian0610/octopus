@@ -127,9 +127,9 @@ class TokenStream(val tokens: List[TokenWithPosition], var current: Int) {
    * @param expected the expected keyword
    * @return
    */
-  def consumeKeyWord(expected : KeyWord):Boolean={
+  def consumeKeyWord(expected : KEYWORD):Boolean={
     peek.map(_.unWrap) match
-      case Some(w: Word.KeyWord) if KeyWords.withNameInsensitiveOption(w.text) == expected =>{
+      case Some(w: Word.KeyWord) if w.k == expected =>{
         next
         true
       }
