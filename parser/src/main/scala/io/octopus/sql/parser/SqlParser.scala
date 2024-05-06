@@ -65,4 +65,8 @@ class SqlParser(sqlDialect: SqlDialect,sqlParingOption: SqlParingOption = SqlPar
       case _ =>
     ???
   }
+
+  private def parseQuery(tokenStream: TokenStream):Either[SqlParsingException,SqlNode]={
+    ???
+  }
 }
