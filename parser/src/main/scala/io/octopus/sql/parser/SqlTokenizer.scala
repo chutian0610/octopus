@@ -269,7 +269,7 @@ class SqlTokenizer(sqlDialect: SqlDialect,sqlParingOption: SqlParingOption = Sql
       case _ => {
         sqlDialect.matchKeyWord(text) match
           case Some(keyword) => {
-            Tokens.keyWord(text)
+            Tokens.keyWord(keyword)
           }
           case None => {
             Tokens.identifier(text, quote)

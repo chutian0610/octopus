@@ -55,8 +55,8 @@ class SqlParser(sqlDialect: SqlDialect,sqlParingOption: SqlParingOption = SqlPar
     val token = tokenStream.peekAndSkipWhitespace.map(_.unWrap)
     token match
       case Some(w: Word.KeyWord)=>{
-        KeyWords.withNameInsensitiveOption(w.text) match {
-          case Some(value@(KeyWords.SELECT | KeyWords.WITH | KeyWords.VALUES)) => {
+        KEYWORDS.withNameInsensitiveOption(w.text) match {
+          case Some(value@(KEYWORDS.SELECT | KEYWORDS.WITH | KEYWORDS.VALUES)) => {
             // handle Query
           }
           case _ => expected("an SQL statement", tokenStream.peek.get)

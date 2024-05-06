@@ -96,7 +96,7 @@ object Tokens {
   def unicodeString(text: String, quote: Char): Token = Literal.UnicodeString(text, quote)
   def number(text: String, isLong: Boolean): Token = Literal.Number(text, isLong)
   def identifier(text: String, quote: Option[Char]): Token = Word.Identifier(text, quote)
-  def keyWord(text: String): Token = Word.KeyWord(text)
+  def keyWord(k: KEYWORD): Token = Word.KeyWord(k)
   def dot: Token = Symbol.DOT()
   def concat: Token = Symbol.CONCAT()
   def eq:Token = Symbol.EQ()
@@ -120,10 +120,16 @@ enum Literal(text: String,
   case Number(text: String, isLong: Boolean, tokenType: TokenType = TokenType.NUMBER) extends Literal(text, tokenType)
 }
 
-enum Word(text: String,
+enum Word(content: String,
           tokenType: TokenType) extends Token {
-  case KeyWord(text: String, tokenType: TokenType = TokenType.KEYWORD) extends Word(text, tokenType)
-  case Identifier(text: String, quote: Option[Char], tokenType: TokenType = TokenType.IDENTIFIER) extends Word(text, tokenType)
+  case KeyWord(k: KEYWORD, tokenType: TokenType = TokenType.KEYWORD) extends Word(k.entryName, tokenType)
+  case Identifier(content: String, quote: Option[Char], tokenType: TokenType = TokenType.IDENTIFIER) extends Word(content, tokenType)
+
+  override def text: String = {
+    this match
+      case Word.KeyWord(k, tokenType) => k.entryName
+      case Word.Identifier(text, quote, tokenType) =>text
+  }
 }
 
 object Word:
