@@ -87,54 +87,6 @@ class TokenStream(val tokens: List[TokenWithPosition], var current: Int) {
     }
     None
   }
-
-  /**
-   * Consume the next token if it matches the expected token, otherwise return false
-   * @param t the expected token
-   * @return
-   */
-  def consume(t:TokenWithPosition): Boolean = {
-    peek match
-      case Some(token) if token == t =>
-        next
-        true
-      case _ =>false
-  }
-
-  /**
-   * Consume the next token if it matches the expected token Type, otherwise return false
-   * @param expected the expected token type
-   * @return
-   */
-  def consumeByTokenType(expected: TokenType): Boolean = {
-    peek match
-      case Some(token) if token.tokenType == expected =>
-        next
-        true
-      case _ =>false
-  }
-  /**
-   * Consume the next token if it matches type of the expected token, otherwise return false
-   * @param expected the expected token
-   * @return
-   */
-  def consumeByTokenType(expected: Token): Boolean = {
-    consumeByTokenType(expected.tokenType)
-  }
-
-  /**
-   * consume the next token if it matches the expected keyword, otherwise return false
-   * @param expected the expected keyword
-   * @return
-   */
-  def consumeKeyWord(expected : KEYWORD):Boolean={
-    peek.map(_.unWrap) match
-      case Some(w: Word.KeyWord) if w.k == expected =>{
-        next
-        true
-      }
-      case _ => false
-  }
   /**
    * compare two token stream, return true if their tokens are same
    * @param obj the other token stream
@@ -163,9 +115,4 @@ class TokenStream(val tokens: List[TokenWithPosition], var current: Int) {
 object TokenStream {
   def apply(tokens: List[TokenWithPosition]): TokenStream =new TokenStream(tokens, 0)
   def of(tokens: List[Token]): TokenStream =new TokenStream(tokens.map(TokenWithPosition(_)), 0)
-
-  def expected(expected: String, found: TokenWithPosition): SqlParsingException =
-    SqlParsingException(s"Expected ${expected}, but found: ${found}", found.position)
-
-
 }

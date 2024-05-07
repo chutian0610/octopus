@@ -3,7 +3,7 @@ package io.octopus.sql.parser.dialect
 import com.google.common.base.CharMatcher
 import enumeratum.*
 import io.octopus.sql.parser.token.{KEYWORD, KEYWORDS}
-import io.octopus.sql.utils.Engine.OCTOPUS
+import io.octopus.common.util.Engine.OCTOPUS
 
 /**
  * generic sql dialect

@@ -13,16 +13,16 @@ lazy val root = (project in file("."))
     commonSettings
   )
   .aggregate(
-    parser,benchmark
+    parser,benchmark,common
   )
 
 lazy val parser = (project in file("parser"))
+  .dependsOn(common)
   .settings(
     name := "parser",
     commonSettings,
     libraryDependencies ++= Seq (
-       fastparse
-      ,scalatest
+      scalatest
       ,antlr4
       ,guava
       ,scalaLogging
@@ -30,6 +30,7 @@ lazy val parser = (project in file("parser"))
       ,enumeratum
     )
   )
+
 lazy val benchmark = (project in file("benchmark"))
   .enablePlugins(Antlr4Plugin)
   .dependsOn(parser)
@@ -46,6 +47,19 @@ lazy val benchmark = (project in file("benchmark"))
       ,guava
       ,scalaLogging
       ,slf4jSimple
+    )
+  )
+lazy val common = (project in file("common"))
+  .settings(
+    name := "common",
+    commonSettings,
+    libraryDependencies ++= Seq (
+      scalatest
+      ,guava
+      ,scalaLogging
+      ,slf4jSimple
+      ,enumeratum
+      ,quest
     )
   )
 

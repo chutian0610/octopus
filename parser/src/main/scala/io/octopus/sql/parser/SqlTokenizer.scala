@@ -1,9 +1,10 @@
 package io.octopus.sql.parser
 
+import quest._
 import com.google.common.base.CharMatcher
 import io.octopus.sql.parser.dialect.SqlDialect
 import io.octopus.sql.parser.token.*
-import io.octopus.sql.utils.Engine.{MYSQL, PRESTO_DB}
+import io.octopus.common.util.Engine.{MYSQL, PRESTO_DB}
 
 class SqlTokenizer(sqlDialect: SqlDialect,sqlParingOption: SqlParingOption = SqlParingOption()) {
 

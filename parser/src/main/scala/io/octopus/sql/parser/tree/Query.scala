@@ -15,8 +15,8 @@ case class Query(position: Option[Position] = None,
 }
 
 case class WithClause(position: Option[Position] = None,
-                      withQueries: List[WithQuery],
-                      recursive: Boolean = false
+                      recursive: Boolean = false,
+                      withQueries: List[WithQuery]
                      ) extends SqlNode(position) {
 
   override def getChildren: List[SqlNode] = withQueries
@@ -24,8 +24,8 @@ case class WithClause(position: Option[Position] = None,
 
 case class WithQuery(position: Option[Position] = None,
                      name: Identifier,
-                     query: Query,
-                     columnNames: Option[List[Identifier]] = None
+                     columnNames: Option[List[Identifier]] = None,
+                     query: Query
                     ) extends SqlNode(position) {
   override def getChildren: List[SqlNode] = List(query)
 }

@@ -1,7 +1,7 @@
 package io.octopus.sql.parser.dialect
 
 import io.octopus.sql.parser.token.KEYWORD
-import io.octopus.sql.utils.Engine
+import io.octopus.common.util.Engine
 
 abstract class SqlDialect(engine: Engine
                      ) {

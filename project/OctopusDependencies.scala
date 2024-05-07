@@ -6,6 +6,9 @@ object OctopusDependencies {
     val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
     val enumeratum =  "com.beachape" %% "enumeratum" % "1.7.3"
 
+    // rust "?" operator
+    val quest= "net.reactivecore" %% "quest" % "0.2.0"
+
     //  ========================= not scala based lib =================================
     val antlr4 = "org.antlr" % "antlr4-runtime" %  "4.13.1"
     val guava ="com.google.guava" % "guava" %  "22.0"

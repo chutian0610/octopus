@@ -1,9 +1,6 @@
 package io.octopus.sql.parser.tree
 
 import io.octopus.sql.parser.Position
-import io.octopus.sql.utils.Engine
-
-import java.util.Locale
 
 /**
  * Root Sql Node.

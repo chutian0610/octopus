@@ -1,7 +1,7 @@
 package io.octopus.sql.parser.tree
 
 import io.octopus.sql.parser.Position
-import io.octopus.sql.utils.Engine
+import io.octopus.common.util.Engine
 
 abstract class Expression(position: Option[Position] = None) extends SqlNode(position) {}
 

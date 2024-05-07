@@ -1,6 +1,7 @@
-package io.octopus.sql.utils
+package io.octopus.common.util
+
 enum Engine{
-  case OCTOPUS,PRESTO_DB, MYSQL, STARROCKS
+  case OCTOPUS,PRESTO_DB, MYSQL, STAR_ROCKS
 }
 
 sealed trait Version{
