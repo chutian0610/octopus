@@ -73,10 +73,10 @@ class SqlParser(sqlDialect: SqlDialect, sqlParingOption: SqlParingOption = SqlPa
 
   def parseQuery(tokenStream: TokenStream): Either[SqlParsingException, Query] = {
     // parse with clause
-    val withClause: Option[WithClause] = if (expectKeyWord(tokenStream, KEYWORDS.WITH)) {
+    val withClause: Option[WithClause] = if (lookAheadKeyWord(tokenStream, KEYWORDS.WITH)) {
       val kw_with = tokenStream.nextAndSkipWhitespace.get
       val position = kw_with.position
-      val recursive = parseKeyWord(tokenStream, KEYWORDS.RECURSIVE)
+      val recursive = consumeKeyWord(tokenStream, KEYWORDS.RECURSIVE)
       parseCommaSeparatedList[WithQuery](tokenStream, parseNamedQuery) match
         case Left(e) => return Left(e)
         case Right(namedQueries) => Some(WithClause(
@@ -109,25 +109,56 @@ class SqlParser(sqlDialect: SqlDialect, sqlParingOption: SqlParingOption = SqlPa
   //  (`name [( col1, col2, ... )] AS (subquery)`)
   def parseNamedQuery(tokenStream: TokenStream): Either[SqlParsingException, WithQuery] = {
     parseIdentifier(tokenStream).flatMap(name => {
-      if (parseKeyWord(tokenStream, KEYWORDS.AS)) {
+      if (consumeKeyWord(tokenStream, KEYWORDS.AS)) {
         // parse subquery
         expectToken(tokenStream, Tokens.leftParen).flatMap(_ => {
-          parseQuery(tokenStream).flatMap(subquery => {
+          parseQuery(tokenStream).flatMap(subQuery => {
             expectToken(tokenStream, Tokens.rightParen).flatMap(_ => {
               Right(WithQuery(
                 position = name.position,
                 name = name,
                 columnNames = None,
-                query = subquery))
+                query = subQuery))
             })
           })
         })
       } else {
-        // parse column names
+        import quest._
+        quest{
+          // parse column names
+          val columnNameList= parseColumnNames(tokenStream).?
+          expectKeyWord(tokenStream, KEYWORDS.AS).?
+          expectToken(tokenStream, Tokens.leftParen).?
+          // parse subQuery
+          val subQuery= parseQuery(tokenStream).?
+          expectToken(tokenStream, Tokens.rightParen).?
+          Right(WithQuery(
+                position = name.position, name = name,
+                columnNames = Some(columnNameList),
+                query = subQuery))
 
-        ???
+        }
       }
     })
+  }
+
+  def parseColumnNames(tokenStream: TokenStream, allowEmpty: Boolean = false, optional: Boolean = true): Either[SqlParsingException, List[Identifier]] = {
+    if (consumeToken(tokenStream, Tokens.leftParen)) {
+      expectToken(tokenStream, Tokens.rightParen) match
+        case Right(t) if allowEmpty => Right(List.empty)
+        case _ =>
+          parseCommaSeparatedList(tokenStream, parseIdentifier).flatMap(list => {
+            expectToken(tokenStream, Tokens.rightParen).flatMap(_ => {
+              Right(list)
+            })
+          })
+    } else {
+      if (optional) {
+        Right(List.empty)
+      } else {
+        Left(expected("a list of columns in parentheses", tokenStream.peek))
+      }
+    }
   }
 
   /**
@@ -143,18 +174,25 @@ class SqlParser(sqlDialect: SqlDialect, sqlParingOption: SqlParingOption = SqlPa
         w.content,
         w.quote.isDefined
       ))
-      case Some(w) => Left(expected("identifier", w))
-      case None => Left(expectedButNone("identifier"))
+      case t: Option[TokenWithPosition] => Left(expected("identifier", t))
   }
 
-  def expectKeyWord(tokenStream: TokenStream, expected: KEYWORD): Boolean = {
+  def lookAheadKeyWord(tokenStream: TokenStream, expected: KEYWORD): Boolean = {
     tokenStream.peekAndSkipWhitespace.map(_.unWrap) match {
       case Some(kw: Word.KeyWord) if kw.k == expected => true
       case _ => false
     }
   }
 
-  def parseKeyWord(tokenStream: TokenStream, expected: KEYWORD): Boolean = {
+  def expectKeyWord(tokenStream: TokenStream, expect: KEYWORD): Either[SqlParsingException, Boolean] = {
+    if (consumeKeyWord(tokenStream, expect)) {
+      Right(true)
+    } else {
+      Left(expected(expect.toString, tokenStream.peek.get))
+    }
+  }
+
+  def consumeKeyWord(tokenStream: TokenStream, expected: KEYWORD): Boolean = {
     tokenStream.peekAndSkipWhitespace.map(_.unWrap) match
       case Some(w: Word.KeyWord) if w.k == expected => {
         // consume token
@@ -163,7 +201,6 @@ class SqlParser(sqlDialect: SqlDialect, sqlParingOption: SqlParingOption = SqlPa
       }
       case _ => false
   }
-
   def consumeToken(tokenStream: TokenStream, expect: Token): Boolean = {
     val peek = tokenStream.peekAndSkipWhitespace
     if (peek.isDefined && peek.exists(t => t.sameAs(expect))) {
@@ -173,19 +210,24 @@ class SqlParser(sqlDialect: SqlDialect, sqlParingOption: SqlParingOption = SqlPa
       false
     }
   }
-
   def expectToken(tokenStream: TokenStream, expect: Token): Either[SqlParsingException, Boolean] = {
     if (consumeToken(tokenStream, expect)) {
       Right(true)
     } else {
-      Left(expected(expect.toString, tokenStream.peek.get))
+      Left(expected(expect.toString, tokenStream.peek))
     }
   }
 
-  def expected(expected: String, found: TokenWithPosition): SqlParsingException =
-    SqlParsingException(s"Expected ${expected}, but found: ${found}", found.position)
+  def expected(expect: String, found: Option[TokenWithPosition]): SqlParsingException = {
+    found match
+      case Some(t) => this.expected(expect, t)
+      case _ => expectedButNone(expect)
+  }
 
-  def expectedButNone(expected: String): SqlParsingException =
-    SqlParsingException(s"Expected ${expected}, but found EOF")
+  def expected(expect: String, found: TokenWithPosition): SqlParsingException =
+    SqlParsingException(s"Expected ${expect}, but found: ${found}", found.position)
+
+  def expectedButNone(expect: String): SqlParsingException =
+    SqlParsingException(s"Expected ${expect}, but found EOF")
 
 }
