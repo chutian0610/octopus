@@ -2,7 +2,7 @@ import OctopusResolvers.*
 import OctopusDependencies.*
 
 ThisBuild / version := "0.1.0-SNAPSHOT"
-ThisBuild / organization := "io.octopus"
+ThisBuild / organization := "io.github.chutian0610.octopus"
 ThisBuild / scalaVersion := "3.3.1"
 
 // ================================ multi projects structure ==============================================
@@ -40,7 +40,7 @@ lazy val benchmark = (project in file("benchmark"))
     Antlr4 / antlr4GenVisitor := true,
     Antlr4 / antlr4GenListener := true,
     Antlr4 / antlr4Version := "4.13.1",
-    Antlr4 / antlr4PackageName := Some ("io.octopus.benchmark.antlrparser"),
+    Antlr4 / antlr4PackageName := Some ("io.github.chutian0610.octopus.benchmark.antlrparser"),
     libraryDependencies ++= Seq (
       scalatest
       ,antlr4
