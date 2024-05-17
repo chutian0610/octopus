@@ -22,7 +22,7 @@ class TokenStream(val tokens: List[TokenWithPosition], var current: Int) {
     var target = n
     var token = tokens.lift(index)
     while (token.isDefined){
-      if( token.get.unWrap.isInstanceOf[WhiteSpace]){
+      if( token.get.token.isInstanceOf[WhiteSpace]){
         // skip whitespace
         index += 1
       }else{
@@ -52,7 +52,7 @@ class TokenStream(val tokens: List[TokenWithPosition], var current: Int) {
   def nextAndSkipWhitespace: Option[TokenWithPosition] = {
     var token = tokens.lift(current)
     while (token.isDefined) {
-      if (token.get.unWrap.isInstanceOf[WhiteSpace]) {
+      if (token.get.token.isInstanceOf[WhiteSpace]) {
         // skip whitespace
         current += 1
       } else {
@@ -76,7 +76,7 @@ class TokenStream(val tokens: List[TokenWithPosition], var current: Int) {
   def prevAndSkipWhitespace: Option[TokenWithPosition] = {
     while (current>0) {
       var token = tokens.lift(current-1)
-      if (token.get.unWrap.isInstanceOf[WhiteSpace]) {
+      if (token.get.token.isInstanceOf[WhiteSpace]) {
         // skip whitespace
         current -= 1
       } else {

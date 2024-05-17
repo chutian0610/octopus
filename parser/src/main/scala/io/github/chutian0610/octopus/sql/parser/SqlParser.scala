@@ -36,7 +36,7 @@ class SqlParser(sqlDialect: SqlDialect, sqlParingOption: SqlParingOption = SqlPa
   def parseStatements(tokenStream: TokenStream): Either[SqlParsingException, List[SqlNode]] = {
     var expecting_statement_delimiter: Boolean = false
     val list = List.newBuilder[SqlNode]
-    while (!tokenStream.peekAndSkipWhitespace.exists(_.unWrap.equals(Tokens.eof))) {
+    while (!tokenStream.peekAndSkipWhitespace.exists(_.sameAs(Tokens.eof))) {
       // ignore empty statements (between successive statement delimiters)
       while (consumeToken(tokenStream, Tokens.semiColon)) {
         expecting_statement_delimiter = false
@@ -60,7 +60,7 @@ class SqlParser(sqlDialect: SqlDialect, sqlParingOption: SqlParingOption = SqlPa
    * @return
    */
   def parseStatement(tokenStream: TokenStream): Either[SqlParsingException, SqlNode] = {
-    val token = tokenStream.peekAndSkipWhitespace.map(_.unWrap)
+    val token = tokenStream.peekAndSkipWhitespace.map(_.token)
     token match
       case Some(w: KeyWord) => {
         w.k match {
@@ -182,7 +182,7 @@ class SqlParser(sqlDialect: SqlDialect, sqlParingOption: SqlParingOption = SqlPa
   }
 
   def lookAheadKeyWord(tokenStream: TokenStream, expected: KEYWORD): Boolean = {
-    tokenStream.peekAndSkipWhitespace.map(_.unWrap) match {
+    tokenStream.peekAndSkipWhitespace.map(_.token) match {
       case Some(kw: Word.KeyWord) if kw.k == expected => true
       case _ => false
     }
@@ -197,7 +197,7 @@ class SqlParser(sqlDialect: SqlDialect, sqlParingOption: SqlParingOption = SqlPa
   }
 
   def consumeKeyWord(tokenStream: TokenStream, expected: KEYWORD): Boolean = {
-    tokenStream.peekAndSkipWhitespace.map(_.unWrap) match
+    tokenStream.peekAndSkipWhitespace.map(_.token) match
       case Some(w: Word.KeyWord) if w.k == expected => {
         // consume token
         tokenStream.nextAndSkipWhitespace
