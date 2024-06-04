@@ -1,6 +1,5 @@
 package io.github.chutian0610.octopus.sql.parser.tree
 
-import io.github.chutian0610.octopus.common.util.Engine
 import io.github.chutian0610.octopus.sql.parser.Position
 
 abstract class Expression(position: Option[Position] = None) extends SqlNode(position) {}
@@ -200,8 +199,7 @@ case class FunctionCall(position: Option[Position] = None,
                         orderBy: Option[OrderBy] = None,
                         distinct: Boolean = false,
                         ignoreNulls: Boolean = false,
-                        arguments: List[Expression],
-                        engine: Engine
+                        arguments: List[Expression]
                        ) extends Expression(position) {
   override def getChildren: List[SqlNode] = {
     val builder = List.newBuilder[SqlNode]

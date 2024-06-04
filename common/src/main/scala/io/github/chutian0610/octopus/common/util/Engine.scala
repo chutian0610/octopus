@@ -25,4 +25,4 @@ case class RangeVersion(min:Option[Int],max:Option[Int]) extends Version{
   }
 }
 
-case class EngineInstance(engineType:Engine, version:Version)
+case class Service(engineType:Engine, version:Version)
