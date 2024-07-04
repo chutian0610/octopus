@@ -111,3 +111,4 @@ gen
 .vscode
 .bloop
 /project/project
+/project/metals.sbt
