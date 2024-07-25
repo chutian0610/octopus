@@ -4,7 +4,7 @@ import quest._
 import com.google.common.base.CharMatcher
 import io.github.chutian0610.octopus.sql.parser.dialect.SqlDialect
 import io.github.chutian0610.octopus.sql.parser.token.*
-import io.github.chutian0610.octopus.common.util.Engine.{PRESTO_DB,MYSQL}
+import io.github.chutian0610.octopus.common.Engine.{PRESTO_DB,MYSQL}
 
 class SqlTokenizer(sqlDialect: SqlDialect,sqlParingOption: SqlParingOption = SqlParingOption()) {
 

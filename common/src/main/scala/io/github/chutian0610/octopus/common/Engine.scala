@@ -1,4 +1,4 @@
-package io.github.chutian0610.octopus.common.util
+package io.github.chutian0610.octopus.common
 
 enum Engine{
   case OCTOPUS,PRESTO_DB, MYSQL, STAR_ROCKS

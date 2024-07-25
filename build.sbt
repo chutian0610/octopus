@@ -4,6 +4,7 @@ import OctopusDependencies.*
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "io.github.chutian0610.octopus"
 ThisBuild / scalaVersion := "3.4.1"
+ThisBuild / semanticdbEnabled:= true
 
 // ================================ multi projects structure ==============================================
 
@@ -78,6 +79,6 @@ lazy val compilerOptions = Seq(
   "-feature",
   "-language:existentials",
   "-language:implicitConversions",
-  "-unchecked"
-//  "-explain"
+  "-unchecked",
+  "-explain"
 )

@@ -8,8 +8,9 @@ object OctopusResolvers {
 
   val allResolver: Seq[MavenRepository] = Seq(
     Resolver.mavenLocal,
+    mavenCentral.withAllowInsecureProtocol(true),
     aliyunPublic.withAllowInsecureProtocol(true),
     aliyunCenter.withAllowInsecureProtocol(true),
-    huaweicloudMaven.withAllowInsecureProtocol(true),
-    mavenCentral.withAllowInsecureProtocol(true))
+    huaweicloudMaven.withAllowInsecureProtocol(true)
+  )
 }

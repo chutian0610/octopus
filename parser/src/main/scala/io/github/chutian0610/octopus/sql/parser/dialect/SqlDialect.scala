@@ -1,6 +1,6 @@
 package io.github.chutian0610.octopus.sql.parser.dialect
 
-import io.github.chutian0610.octopus.common.util.Engine
+import io.github.chutian0610.octopus.common.Engine
 import io.github.chutian0610.octopus.sql.parser.token.KEYWORD
 
 abstract class SqlDialect(engine: Engine

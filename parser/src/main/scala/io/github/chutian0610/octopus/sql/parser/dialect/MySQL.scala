@@ -3,7 +3,7 @@ package io.github.chutian0610.octopus.sql.parser.dialect
 import com.google.common.base.CharMatcher
 import enumeratum.*
 import io.github.chutian0610.octopus.sql.parser.token.{KEYWORD, KEYWORDS}
-import io.github.chutian0610.octopus.common.util.Engine.MYSQL
+import io.github.chutian0610.octopus.common.Engine.MYSQL
 
 /**
  *
