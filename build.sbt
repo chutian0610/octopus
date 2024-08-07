@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
     commonSettings
   )
   .aggregate(
-    parser,benchmark,common
+    parser,benchmark,common,memory
   )
 
 lazy val parser = (project in file("parser"))
@@ -61,6 +61,20 @@ lazy val common = (project in file("common"))
       ,slf4jSimple
       ,enumeratum
       ,quest
+    )
+  )
+
+  lazy val memory = (project in file("memory"))
+  .dependsOn(common)
+  .settings(
+    name := "memory",
+    commonSettings,
+    libraryDependencies ++= Seq (
+      scalatest
+      ,guava
+      ,scalaLogging
+      ,slf4jSimple
+      ,enumeratum
     )
   )
 
