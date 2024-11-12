@@ -3,7 +3,7 @@ use std::path::Path;
 fn main() -> Result<(), String> {
 
     use std::io::Write;
-    let out = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    let out: std::path::PathBuf = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
 
     // for use in docker build where file changes can be wonky
     println!("cargo:rerun-if-env-changed=FORCE_REBUILD");
@@ -11,9 +11,6 @@ fn main() -> Result<(), String> {
     let version = rustc_version::version().unwrap();
     println!("cargo:rustc-env=RUSTC_VERSION={version}");
 
-    #[cfg(feature = "docsrs")]
-    let path = out.join("octopus.rs");
-    #[cfg(not(feature = "docsrs"))]
     let path = "src/serde/generated/octopus.rs";
 
     // We don't include the proto files in releases so that downstreams
