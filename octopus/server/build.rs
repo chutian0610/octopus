@@ -13,8 +13,7 @@ fn main() -> Result<(), String> {
 
     let path = "src/serde/generated/octopus.rs";
 
-    // We don't include the proto files in releases so that downstreams
-    // do not need to have PROTOC included
+    // don't include the proto files in releases
     if Path::new("proto/octopus.proto").exists() {
         // println!("cargo:rerun-if-changed=proto/datafusion_common.proto");
         // println!("cargo:rerun-if-changed=proto/datafusion.proto");
