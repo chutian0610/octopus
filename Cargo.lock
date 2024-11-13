@@ -525,6 +525,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "octopus-core"
+version = "0.1.0"
+dependencies = [
+ "prost",
+ "prost-types",
+ "rustc_version",
+ "tokio",
+ "tonic",
+ "tonic-build",
+]
+
+[[package]]
+name = "octopus-server"
+version = "0.1.0"
+dependencies = [
+ "octopus-core",
+ "prost",
+ "prost-types",
+ "rustc_version",
+ "tokio",
+ "tonic",
+ "tonic-build",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -823,18 +848,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "prost",
- "prost-types",
- "rustc_version",
- "tokio",
- "tonic",
- "tonic-build",
 ]
 
 [[package]]

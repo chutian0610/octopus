@@ -13,11 +13,11 @@ fn main() -> Result<(), String> {
 
     // don't include the proto files in releases
     if Path::new("proto/octopus.proto").exists() {
-        println!("cargo::warning=Generating source code for octopus.proto");
+        let path = "src/serde/generated/octopus.rs";
+        println!("cargo::warning=Generating source code {} for octopus.proto",path);
         // println!("cargo:rerun-if-changed=proto/datafusion_common.proto");
         // println!("cargo:rerun-if-changed=proto/datafusion.proto");
         println!("cargo:rerun-if-changed=proto/octopus.proto");
-        let path = "src/serde/generated/octopus.rs";
         tonic_build::configure()
             // .extern_path(".datafusion_common", "::datafusion_proto_common")
             // .extern_path(".datafusion", "::datafusion_proto::protobuf")

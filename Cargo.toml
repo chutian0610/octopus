@@ -1,6 +1,6 @@
 [workspace]
 
-members = ["octopus/server"]
+members = ["octopus/server","octopus/core"]
 resolver = "2"
 
 [workspace.dependencies]
