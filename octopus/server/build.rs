@@ -11,13 +11,13 @@ fn main() -> Result<(), String> {
     let version = rustc_version::version().unwrap();
     println!("cargo:rustc-env=RUSTC_VERSION={version}");
 
-    let path = "src/serde/generated/octopus.rs";
-
     // don't include the proto files in releases
     if Path::new("proto/octopus.proto").exists() {
+        println!("cargo::warning=Generating source code for octopus.proto");
         // println!("cargo:rerun-if-changed=proto/datafusion_common.proto");
         // println!("cargo:rerun-if-changed=proto/datafusion.proto");
         println!("cargo:rerun-if-changed=proto/octopus.proto");
+        let path = "src/serde/generated/octopus.rs";
         tonic_build::configure()
             // .extern_path(".datafusion_common", "::datafusion_proto_common")
             // .extern_path(".datafusion", "::datafusion_proto::protobuf")
