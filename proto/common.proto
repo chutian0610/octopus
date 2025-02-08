@@ -1,0 +1,9 @@
+syntax = "proto3";
+package common;
+
+enum ServiceStatus {
+  UNKNOWN = 0;
+  ACTIVE = 1;
+  DEAD = 2;
+  TERMINATING = 3;
+}

@@ -1,0 +1,16 @@
+syntax = "proto3";
+package health;
+import "common.proto";
+
+
+message HealthCheckReq {
+  string service = 1;
+}
+
+message HealthCheckResp {
+  common.ServiceStatus status = 1;
+}
+
+service HealthChecker {
+  rpc Check(HealthCheckReq) returns (HealthCheckResp);
+}
