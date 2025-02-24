@@ -1,10 +1,14 @@
 syntax = "proto3";
-package health;
+package discovery;
 import "common.proto";
 
+/* =============== Discovery Server ================= */
 
+
+
+
+/* =============== Service Health Checker ================= */
 message HealthCheckReq {
-  string service = 1;
 }
 
 message HealthCheckResp {
