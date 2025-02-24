@@ -7,3 +7,11 @@ enum ServiceStatus {
   DEAD = 2;
   TERMINATING = 3;
 }
+
+message ServiceInstance {
+  string service_id = 1;
+  string cluster_id = 2;
+  string instance_id = 3;
+  string host = 4;
+  int32 port = 5;
+}
