@@ -6,7 +6,6 @@ import "common.proto";
 
 message SerivceAnnounceReq {
   string service_id = 1;
-  string cluster_id = 2;
   string instance_id = 3;
   string host = 4;
   int32 port = 5;
@@ -16,8 +15,6 @@ message ServiceAnnounceResp {}
 
 message GetServicesReq {
   string service_id = 1;
-  // filter by cluster_id (optional)
-  optional string cluster_id = 2;
 }
 
 message GetSerivcesResp {
