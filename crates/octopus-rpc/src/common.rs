@@ -3,8 +3,6 @@
 pub struct ServiceInstance {
     #[prost(string, tag = "1")]
     pub service_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub cluster_id: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub instance_id: ::prost::alloc::string::String,
     #[prost(string, tag = "4")]

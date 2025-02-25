@@ -3,8 +3,6 @@
 pub struct SerivceAnnounceReq {
     #[prost(string, tag = "1")]
     pub service_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub cluster_id: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub instance_id: ::prost::alloc::string::String,
     #[prost(string, tag = "4")]
@@ -18,9 +16,6 @@ pub struct ServiceAnnounceResp {}
 pub struct GetServicesReq {
     #[prost(string, tag = "1")]
     pub service_id: ::prost::alloc::string::String,
-    /// filter by cluster_id (optional)
-    #[prost(string, optional, tag = "2")]
-    pub cluster_id: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetSerivcesResp {

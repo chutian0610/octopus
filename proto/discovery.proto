@@ -3,6 +3,24 @@ package discovery;
 import "common.proto";
 
 /* =============== Discovery Server ================= */
+/*
+          +-------------+     
+          |             |     
+   +------+  Discovery  |     
+   |      |    Server   |     
+   |      |             |     
+   |      +--------^----+     
+   |               |          
+   |LookUp         |Announce  
+   |               |UnAnnounce
+   |               |          
++--v----------+    |          
+|             |    |          
+|  Discovery  +----+          
+|    Client   |               
+|             |               
++-------------+               
+ */
 
 message SerivceAnnounceReq {
   string service_id = 1;
@@ -13,11 +31,11 @@ message SerivceAnnounceReq {
 
 message ServiceAnnounceResp {}
 
-message GetServicesReq {
+message LookUpReq {
   string service_id = 1;
 }
 
-message GetSerivcesResp {
+message LookUpResp {
   repeated common.ServiceInstance instances = 1;
 }
 
@@ -26,8 +44,8 @@ service DiscoveryServer {
   rpc Announce(SerivceAnnounceReq) returns (ServiceAnnounceResp);
   // UnAnnounce a node from the discovery server.
   rpc UnAnnounce(SerivceAnnounceReq) returns (ServiceAnnounceResp);
-  // Get all services.
-  rpc GetServices(GetServicesReq) returns (GetSerivcesResp);
+  // look up services.
+  rpc LookUp(GetServicesReq) returns (GetSerivcesResp);
 
 }
 /* =============== Service Health Checker ================= */
