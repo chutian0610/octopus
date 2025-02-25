@@ -4,22 +4,22 @@ import "common.proto";
 
 /* =============== Discovery Server ================= */
 /*
-          +-------------+     
-          |             |     
-   +------+  Discovery  |     
-   |      |    Server   |     
-   |      |             |     
-   |      +--------^----+     
-   |               |          
-   |LookUp         |Announce  
-   |               |UnAnnounce
-   |               |          
-+--v----------+    |          
-|             |    |          
-|  Discovery  +----+          
-|    Client   |               
-|             |               
-+-------------+               
+          ┌─────────────┐     
+          │             │     
+   ┌──────┼  Discovery  │     
+   │      │    Server   │     
+   │      │             │     
+   │      └────────▲────┘     
+   │               │          
+   │LookUp         │Announce  
+   │               │UnAnnounce
+   │               │          
+┌──▼──────────┐    │          
+│             │    │          
+│  Discovery  ┼────┘          
+│    Client   │               
+│             │               
+└─────────────┘               
  */
 
 message SerivceAnnounceReq {
