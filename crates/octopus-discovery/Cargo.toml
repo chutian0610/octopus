@@ -5,5 +5,7 @@ edition = "2021"
 
 [dependencies]
 
+octopus-rpc = { version = "0.1.0", path = "../octopus-rpc" }
+tonic = { workspace = true }
 
 [build-dependencies]

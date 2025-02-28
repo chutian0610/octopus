@@ -39,7 +39,7 @@ message LookUpResp {
   repeated common.ServiceInstance instances = 1;
 }
 
-service DiscoveryServer {
+service DiscoveryService {
   // Announce a node to the discovery server.
   rpc Announce(SerivceAnnounceReq) returns (ServiceAnnounceResp);
   // UnAnnounce a node from the discovery server.
@@ -56,6 +56,6 @@ message HealthCheckResp {
   common.ServiceStatus status = 1;
 }
 
-service HealthChecker {
+service HealthCheckService {
   rpc Check(HealthCheckReq) returns (HealthCheckResp);
 }

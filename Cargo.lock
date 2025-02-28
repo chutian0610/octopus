@@ -536,6 +536,10 @@ dependencies = [
 [[package]]
 name = "octopus-discovery"
 version = "0.1.0"
+dependencies = [
+ "octopus-rpc",
+ "tonic",
+]
 
 [[package]]
 name = "octopus-rpc"

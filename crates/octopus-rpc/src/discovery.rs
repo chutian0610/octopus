@@ -31,7 +31,7 @@ pub struct HealthCheckResp {
     pub status: i32,
 }
 /// Generated client implementations.
-pub mod discovery_server_client {
+pub mod discovery_service_client {
     #![allow(
         unused_variables,
         dead_code,
@@ -42,10 +42,10 @@ pub mod discovery_server_client {
     use tonic::codegen::*;
     use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
-    pub struct DiscoveryServerClient<T> {
+    pub struct DiscoveryServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl DiscoveryServerClient<tonic::transport::Channel> {
+    impl DiscoveryServiceClient<tonic::transport::Channel> {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -56,7 +56,7 @@ pub mod discovery_server_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> DiscoveryServerClient<T>
+    impl<T> DiscoveryServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
@@ -74,7 +74,7 @@ pub mod discovery_server_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> DiscoveryServerClient<InterceptedService<T, F>>
+        ) -> DiscoveryServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
@@ -88,7 +88,7 @@ pub mod discovery_server_client {
                 http::Request<tonic::body::BoxBody>,
             >>::Error: Into<StdError> + std::marker::Send + std::marker::Sync,
         {
-            DiscoveryServerClient::new(InterceptedService::new(inner, interceptor))
+            DiscoveryServiceClient::new(InterceptedService::new(inner, interceptor))
         }
         /// Compress requests with the given encoding.
         ///
@@ -139,11 +139,11 @@ pub mod discovery_server_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/discovery.DiscoveryServer/Announce",
+                "/discovery.DiscoveryService/Announce",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("discovery.DiscoveryServer", "Announce"));
+                .insert(GrpcMethod::new("discovery.DiscoveryService", "Announce"));
             self.inner.unary(req, path, codec).await
         }
         /// UnAnnounce a node from the discovery server.
@@ -164,11 +164,11 @@ pub mod discovery_server_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/discovery.DiscoveryServer/UnAnnounce",
+                "/discovery.DiscoveryService/UnAnnounce",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("discovery.DiscoveryServer", "UnAnnounce"));
+                .insert(GrpcMethod::new("discovery.DiscoveryService", "UnAnnounce"));
             self.inner.unary(req, path, codec).await
         }
         /// look up services.
@@ -186,17 +186,17 @@ pub mod discovery_server_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/discovery.DiscoveryServer/LookUp",
+                "/discovery.DiscoveryService/LookUp",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("discovery.DiscoveryServer", "LookUp"));
+                .insert(GrpcMethod::new("discovery.DiscoveryService", "LookUp"));
             self.inner.unary(req, path, codec).await
         }
     }
 }
 /// Generated client implementations.
-pub mod health_checker_client {
+pub mod health_check_service_client {
     #![allow(
         unused_variables,
         dead_code,
@@ -207,10 +207,10 @@ pub mod health_checker_client {
     use tonic::codegen::*;
     use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
-    pub struct HealthCheckerClient<T> {
+    pub struct HealthCheckServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl HealthCheckerClient<tonic::transport::Channel> {
+    impl HealthCheckServiceClient<tonic::transport::Channel> {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -221,7 +221,7 @@ pub mod health_checker_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> HealthCheckerClient<T>
+    impl<T> HealthCheckServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
@@ -239,7 +239,7 @@ pub mod health_checker_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> HealthCheckerClient<InterceptedService<T, F>>
+        ) -> HealthCheckServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
@@ -253,7 +253,7 @@ pub mod health_checker_client {
                 http::Request<tonic::body::BoxBody>,
             >>::Error: Into<StdError> + std::marker::Send + std::marker::Sync,
         {
-            HealthCheckerClient::new(InterceptedService::new(inner, interceptor))
+            HealthCheckServiceClient::new(InterceptedService::new(inner, interceptor))
         }
         /// Compress requests with the given encoding.
         ///
@@ -303,17 +303,17 @@ pub mod health_checker_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/discovery.HealthChecker/Check",
+                "/discovery.HealthCheckService/Check",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("discovery.HealthChecker", "Check"));
+                .insert(GrpcMethod::new("discovery.HealthCheckService", "Check"));
             self.inner.unary(req, path, codec).await
         }
     }
 }
 /// Generated server implementations.
-pub mod discovery_server_server {
+pub mod discovery_service_server {
     #![allow(
         unused_variables,
         dead_code,
@@ -322,9 +322,9 @@ pub mod discovery_server_server {
         clippy::let_unit_value,
     )]
     use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with DiscoveryServerServer.
+    /// Generated trait containing gRPC methods that should be implemented for use with DiscoveryServiceServer.
     #[async_trait]
-    pub trait DiscoveryServer: std::marker::Send + std::marker::Sync + 'static {
+    pub trait DiscoveryService: std::marker::Send + std::marker::Sync + 'static {
         /// Announce a node to the discovery server.
         async fn announce(
             &self,
@@ -348,14 +348,14 @@ pub mod discovery_server_server {
         ) -> std::result::Result<tonic::Response<super::LookUpResp>, tonic::Status>;
     }
     #[derive(Debug)]
-    pub struct DiscoveryServerServer<T> {
+    pub struct DiscoveryServiceServer<T> {
         inner: Arc<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
         max_decoding_message_size: Option<usize>,
         max_encoding_message_size: Option<usize>,
     }
-    impl<T> DiscoveryServerServer<T> {
+    impl<T> DiscoveryServiceServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
@@ -406,9 +406,9 @@ pub mod discovery_server_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for DiscoveryServerServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for DiscoveryServiceServer<T>
     where
-        T: DiscoveryServer,
+        T: DiscoveryService,
         B: Body + std::marker::Send + 'static,
         B::Error: Into<StdError> + std::marker::Send + 'static,
     {
@@ -423,11 +423,11 @@ pub mod discovery_server_server {
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             match req.uri().path() {
-                "/discovery.DiscoveryServer/Announce" => {
+                "/discovery.DiscoveryService/Announce" => {
                     #[allow(non_camel_case_types)]
-                    struct AnnounceSvc<T: DiscoveryServer>(pub Arc<T>);
+                    struct AnnounceSvc<T: DiscoveryService>(pub Arc<T>);
                     impl<
-                        T: DiscoveryServer,
+                        T: DiscoveryService,
                     > tonic::server::UnaryService<super::SerivceAnnounceReq>
                     for AnnounceSvc<T> {
                         type Response = super::ServiceAnnounceResp;
@@ -441,7 +441,7 @@ pub mod discovery_server_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as DiscoveryServer>::announce(&inner, request).await
+                                <T as DiscoveryService>::announce(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -468,11 +468,11 @@ pub mod discovery_server_server {
                     };
                     Box::pin(fut)
                 }
-                "/discovery.DiscoveryServer/UnAnnounce" => {
+                "/discovery.DiscoveryService/UnAnnounce" => {
                     #[allow(non_camel_case_types)]
-                    struct UnAnnounceSvc<T: DiscoveryServer>(pub Arc<T>);
+                    struct UnAnnounceSvc<T: DiscoveryService>(pub Arc<T>);
                     impl<
-                        T: DiscoveryServer,
+                        T: DiscoveryService,
                     > tonic::server::UnaryService<super::SerivceAnnounceReq>
                     for UnAnnounceSvc<T> {
                         type Response = super::ServiceAnnounceResp;
@@ -486,7 +486,7 @@ pub mod discovery_server_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as DiscoveryServer>::un_announce(&inner, request).await
+                                <T as DiscoveryService>::un_announce(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -513,11 +513,11 @@ pub mod discovery_server_server {
                     };
                     Box::pin(fut)
                 }
-                "/discovery.DiscoveryServer/LookUp" => {
+                "/discovery.DiscoveryService/LookUp" => {
                     #[allow(non_camel_case_types)]
-                    struct LookUpSvc<T: DiscoveryServer>(pub Arc<T>);
+                    struct LookUpSvc<T: DiscoveryService>(pub Arc<T>);
                     impl<
-                        T: DiscoveryServer,
+                        T: DiscoveryService,
                     > tonic::server::UnaryService<super::LookUpReq> for LookUpSvc<T> {
                         type Response = super::LookUpResp;
                         type Future = BoxFuture<
@@ -530,7 +530,7 @@ pub mod discovery_server_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as DiscoveryServer>::look_up(&inner, request).await
+                                <T as DiscoveryService>::look_up(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -577,7 +577,7 @@ pub mod discovery_server_server {
             }
         }
     }
-    impl<T> Clone for DiscoveryServerServer<T> {
+    impl<T> Clone for DiscoveryServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -590,13 +590,13 @@ pub mod discovery_server_server {
         }
     }
     /// Generated gRPC service name
-    pub const SERVICE_NAME: &str = "discovery.DiscoveryServer";
-    impl<T> tonic::server::NamedService for DiscoveryServerServer<T> {
+    pub const SERVICE_NAME: &str = "discovery.DiscoveryService";
+    impl<T> tonic::server::NamedService for DiscoveryServiceServer<T> {
         const NAME: &'static str = SERVICE_NAME;
     }
 }
 /// Generated server implementations.
-pub mod health_checker_server {
+pub mod health_check_service_server {
     #![allow(
         unused_variables,
         dead_code,
@@ -605,23 +605,23 @@ pub mod health_checker_server {
         clippy::let_unit_value,
     )]
     use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with HealthCheckerServer.
+    /// Generated trait containing gRPC methods that should be implemented for use with HealthCheckServiceServer.
     #[async_trait]
-    pub trait HealthChecker: std::marker::Send + std::marker::Sync + 'static {
+    pub trait HealthCheckService: std::marker::Send + std::marker::Sync + 'static {
         async fn check(
             &self,
             request: tonic::Request<super::HealthCheckReq>,
         ) -> std::result::Result<tonic::Response<super::HealthCheckResp>, tonic::Status>;
     }
     #[derive(Debug)]
-    pub struct HealthCheckerServer<T> {
+    pub struct HealthCheckServiceServer<T> {
         inner: Arc<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
         max_decoding_message_size: Option<usize>,
         max_encoding_message_size: Option<usize>,
     }
-    impl<T> HealthCheckerServer<T> {
+    impl<T> HealthCheckServiceServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
@@ -672,9 +672,9 @@ pub mod health_checker_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for HealthCheckerServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for HealthCheckServiceServer<T>
     where
-        T: HealthChecker,
+        T: HealthCheckService,
         B: Body + std::marker::Send + 'static,
         B::Error: Into<StdError> + std::marker::Send + 'static,
     {
@@ -689,11 +689,11 @@ pub mod health_checker_server {
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             match req.uri().path() {
-                "/discovery.HealthChecker/Check" => {
+                "/discovery.HealthCheckService/Check" => {
                     #[allow(non_camel_case_types)]
-                    struct CheckSvc<T: HealthChecker>(pub Arc<T>);
+                    struct CheckSvc<T: HealthCheckService>(pub Arc<T>);
                     impl<
-                        T: HealthChecker,
+                        T: HealthCheckService,
                     > tonic::server::UnaryService<super::HealthCheckReq>
                     for CheckSvc<T> {
                         type Response = super::HealthCheckResp;
@@ -707,7 +707,7 @@ pub mod health_checker_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as HealthChecker>::check(&inner, request).await
+                                <T as HealthCheckService>::check(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -754,7 +754,7 @@ pub mod health_checker_server {
             }
         }
     }
-    impl<T> Clone for HealthCheckerServer<T> {
+    impl<T> Clone for HealthCheckServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -767,8 +767,8 @@ pub mod health_checker_server {
         }
     }
     /// Generated gRPC service name
-    pub const SERVICE_NAME: &str = "discovery.HealthChecker";
-    impl<T> tonic::server::NamedService for HealthCheckerServer<T> {
+    pub const SERVICE_NAME: &str = "discovery.HealthCheckService";
+    impl<T> tonic::server::NamedService for HealthCheckServiceServer<T> {
         const NAME: &'static str = SERVICE_NAME;
     }
 }
