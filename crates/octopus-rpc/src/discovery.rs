@@ -13,12 +13,12 @@ pub struct SerivceAnnounceReq {
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct ServiceAnnounceResp {}
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetServicesReq {
+pub struct LookUpReq {
     #[prost(string, tag = "1")]
     pub service_id: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetSerivcesResp {
+pub struct LookUpResp {
     #[prost(message, repeated, tag = "1")]
     pub instances: ::prost::alloc::vec::Vec<super::common::ServiceInstance>,
 }
@@ -171,14 +171,11 @@ pub mod discovery_server_client {
                 .insert(GrpcMethod::new("discovery.DiscoveryServer", "UnAnnounce"));
             self.inner.unary(req, path, codec).await
         }
-        /// Get all services.
-        pub async fn get_services(
+        /// look up services.
+        pub async fn look_up(
             &mut self,
-            request: impl tonic::IntoRequest<super::GetServicesReq>,
-        ) -> std::result::Result<
-            tonic::Response<super::GetSerivcesResp>,
-            tonic::Status,
-        > {
+            request: impl tonic::IntoRequest<super::LookUpReq>,
+        ) -> std::result::Result<tonic::Response<super::LookUpResp>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -189,11 +186,11 @@ pub mod discovery_server_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/discovery.DiscoveryServer/GetServices",
+                "/discovery.DiscoveryServer/LookUp",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("discovery.DiscoveryServer", "GetServices"));
+                .insert(GrpcMethod::new("discovery.DiscoveryServer", "LookUp"));
             self.inner.unary(req, path, codec).await
         }
     }
@@ -344,11 +341,11 @@ pub mod discovery_server_server {
             tonic::Response<super::ServiceAnnounceResp>,
             tonic::Status,
         >;
-        /// Get all services.
-        async fn get_services(
+        /// look up services.
+        async fn look_up(
             &self,
-            request: tonic::Request<super::GetServicesReq>,
-        ) -> std::result::Result<tonic::Response<super::GetSerivcesResp>, tonic::Status>;
+            request: tonic::Request<super::LookUpReq>,
+        ) -> std::result::Result<tonic::Response<super::LookUpResp>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct DiscoveryServerServer<T> {
@@ -516,25 +513,24 @@ pub mod discovery_server_server {
                     };
                     Box::pin(fut)
                 }
-                "/discovery.DiscoveryServer/GetServices" => {
+                "/discovery.DiscoveryServer/LookUp" => {
                     #[allow(non_camel_case_types)]
-                    struct GetServicesSvc<T: DiscoveryServer>(pub Arc<T>);
+                    struct LookUpSvc<T: DiscoveryServer>(pub Arc<T>);
                     impl<
                         T: DiscoveryServer,
-                    > tonic::server::UnaryService<super::GetServicesReq>
-                    for GetServicesSvc<T> {
-                        type Response = super::GetSerivcesResp;
+                    > tonic::server::UnaryService<super::LookUpReq> for LookUpSvc<T> {
+                        type Response = super::LookUpResp;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::GetServicesReq>,
+                            request: tonic::Request<super::LookUpReq>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as DiscoveryServer>::get_services(&inner, request).await
+                                <T as DiscoveryServer>::look_up(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -545,7 +541,7 @@ pub mod discovery_server_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
-                        let method = GetServicesSvc(inner);
+                        let method = LookUpSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

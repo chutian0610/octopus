@@ -1,7 +1,8 @@
 [workspace]
 
 members = [
-    "crates/octopus-rpc"
+    "crates/octopus-rpc",
+    "crates/octopus-discovery"
 ]
 resolver = "2"
 

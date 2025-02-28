@@ -45,7 +45,7 @@ service DiscoveryServer {
   // UnAnnounce a node from the discovery server.
   rpc UnAnnounce(SerivceAnnounceReq) returns (ServiceAnnounceResp);
   // look up services.
-  rpc LookUp(GetServicesReq) returns (GetSerivcesResp);
+  rpc LookUp(LookUpReq) returns (LookUpResp);
 
 }
 /* =============== Service Health Checker ================= */
