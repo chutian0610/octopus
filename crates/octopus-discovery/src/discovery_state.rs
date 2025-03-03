@@ -1,0 +1,6 @@
+trait LocalDiscoveryStore {
+    
+}
+trait RemoteDiscoveryStore {
+    
+}

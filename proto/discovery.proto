@@ -3,24 +3,6 @@ package discovery;
 import "common.proto";
 
 /* =============== Discovery Server ================= */
-/*
-          ┌─────────────┐     
-          │             │     
-   ┌──────┼  Discovery  │     
-   │      │    Server   │     
-   │      │             │     
-   │      └────────▲────┘     
-   │               │          
-   │LookUp         │Announce  
-   │               │UnAnnounce
-   │               │          
-┌──▼──────────┐    │          
-│             │    │          
-│  Discovery  ┼────┘          
-│    Client   │               
-│             │               
-└─────────────┘               
- */
 
 message SerivceAnnounceReq {
   string service_id = 1;
