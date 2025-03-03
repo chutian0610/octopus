@@ -11,6 +11,6 @@ tonic = { workspace = true }
 [build-dependencies]
 
 rustc_version = "0.4.0"
-fs-err = "3.1"
+fs-err = "3.1.0"
 tonic-build = { workspace = true }
 walkdir = "2"

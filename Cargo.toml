@@ -8,11 +8,12 @@ resolver = "2"
 
 [workspace.dependencies]
 
-tokio = { version = "1" }
-prost = { version = "0.13" }
-prost-types = { version = "0.13" }
+tokio = { version = "1.41.1" }
+prost = { version = "0.13.3" }
+prost-types = { version = "0.13.3" }
 tonic = { version = "0.12" }
 tonic-build = { version = "0.12", default-features = false, features = [
     "transport",
     "prost"
 ] }
+dashmap = { version = "6.1.0" }
