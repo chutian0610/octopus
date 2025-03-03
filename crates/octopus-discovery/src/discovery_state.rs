@@ -1,3 +1,7 @@
+trait DiscoveryState {
+
+}
+
 trait LocalDiscoveryStore {
     
 }
