@@ -1,5 +1,6 @@
 use crate::ServiceMetadata;
 
+/// Discovery state interface
 trait DiscoveryState {
     async fn save(&self, data: ServiceMetadata);
     async fn remove(&self, data: ServiceMetadata);
