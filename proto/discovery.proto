@@ -4,17 +4,23 @@ import "common.proto";
 
 /* =============== Discovery Server ================= */
 
-message SerivceAnnounceReq {
-  string service_id = 1;
-  string instance_id = 3;
-  string host = 4;
-  int32 port = 5;
+message NodeAnnounceReq {
+  string cluster_id = 1;
+  string instance_id = 2;
+  repeated ServiceAnnounceReq services = 3;
 }
 
-message ServiceAnnounceResp {}
+message ServiceAnnounceReq{
+  string service_id = 1;
+  string host = 2;
+  int32 port = 3;
+}
+
+message NodeAnnounceResp {}
 
 message LookUpReq {
   string service_id = 1;
+  string cluster_id = 2;
 }
 
 message LookUpResp {
@@ -23,9 +29,9 @@ message LookUpResp {
 
 service DiscoveryService {
   // Announce a node to the discovery server.
-  rpc Announce(SerivceAnnounceReq) returns (ServiceAnnounceResp);
+  rpc Announce(NodeAnnounceReq) returns (NodeAnnounceResp);
   // UnAnnounce a node from the discovery server.
-  rpc UnAnnounce(SerivceAnnounceReq) returns (ServiceAnnounceResp);
+  rpc UnAnnounce(NodeAnnounceReq) returns (NodeAnnounceResp);
   // look up services.
   rpc LookUp(LookUpReq) returns (LookUpResp);
 

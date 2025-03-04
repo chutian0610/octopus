@@ -1,4 +1,4 @@
-use octopus_rpc::discovery::{discovery_service_server::DiscoveryService, LookUpReq, LookUpResp, SerivceAnnounceReq, ServiceAnnounceResp};
+use octopus_rpc::discovery::{discovery_service_server::DiscoveryService, LookUpReq, LookUpResp, NodeAnnounceReq, NodeAnnounceResp};
 use tonic::{Request, Response, Status};
 #[derive(Clone)]
 pub struct DiscoveryServer{
@@ -14,16 +14,16 @@ impl DiscoveryServer {
 impl DiscoveryService for DiscoveryServer {
     async fn announce(
         &self,
-        request: Request<SerivceAnnounceReq>,
-    ) -> Result<Response<ServiceAnnounceResp>,Status>{
+        request: Request<NodeAnnounceReq>,
+    ) -> Result<Response<NodeAnnounceResp>,Status>{
         let req = request.into_inner();
         
         todo!()
     }
     async fn un_announce(
         &self,
-        request: Request<SerivceAnnounceReq>,
-    ) -> Result<Response<ServiceAnnounceResp>,Status>{
+        request: Request<NodeAnnounceReq>,
+    ) -> Result<Response<NodeAnnounceResp>,Status>{
         todo!()
     }
     async fn look_up(
