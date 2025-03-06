@@ -13,6 +13,7 @@ trait DiscoveryState {
 }
 
 /// Local store interface.
+/// Local store is used to store service metadata locally.
 trait LocalDiscoveryStore {
     async fn get(
         &self,
@@ -29,6 +30,7 @@ trait LocalDiscoveryStore {
     ) -> Vec<ServiceMetadata>;
 }
 /// Remote store interface.
+/// Remote store is used to for sync service metadata with remote store.
 trait RemoteDiscoveryStore {
     async fn save(&self, data: ServiceMetadata);
 }
