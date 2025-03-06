@@ -14,11 +14,11 @@
 /// │    Client   │               
 /// │             │               
 /// └─────────────┘  
-pub mod discovery_client;             
+pub mod discovery_client;
 pub mod discovery_server;
 
 mod discovery_state;
-#[derive(Clone)] 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ServiceMetadata {
     service_id: String,
     cluster_id: String,
