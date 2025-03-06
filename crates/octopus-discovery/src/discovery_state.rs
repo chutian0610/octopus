@@ -1,6 +1,7 @@
 use crate::ServiceMetadata;
 
-/// Discovery state interface
+/// Discovery state interface.
+/// is used to manage service metadata
 trait DiscoveryState {
     async fn save(&self, data: ServiceMetadata);
     async fn remove(&self, data: ServiceMetadata);
@@ -11,6 +12,7 @@ trait DiscoveryState {
     ) -> Vec<ServiceMetadata>;
 }
 
+/// Local store interface.
 trait LocalDiscoveryStore {
     async fn get(
         &self,
@@ -26,6 +28,7 @@ trait LocalDiscoveryStore {
         cluster_id: Option<&str>,
     ) -> Vec<ServiceMetadata>;
 }
+/// Remote store interface.
 trait RemoteDiscoveryStore {
     async fn save(&self, data: ServiceMetadata);
 }
