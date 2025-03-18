@@ -25,11 +25,11 @@ use super::{LocalDiscoveryStore, RemoteDiscoveryStore};
 ///           │   Server    │       
 ///           └─────────────┘       
 
-struct ReplicatedState {
+struct ReplicatedState<L: LocalDiscoveryStore, R: RemoteDiscoveryStore> {
     /// The local store.
-    local: Box<dyn LocalDiscoveryStore>,
+    local: L,
     /// The remote store.
-    remote: Box<dyn RemoteDiscoveryStore>,
+    remote: R,
     /// replicator.
     replicator: Replicator,
 }
