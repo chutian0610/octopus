@@ -15,11 +15,11 @@ impl LocalDiscoveryStore for InMemoryStore {
         todo!()
     }
 
-    async fn remove(&self, data: ServiceMetadata) {
+    async fn remove(&self, datas: Vec<ServiceMetadata>) {
         todo!()
     }
 
-    async fn save(&self, data: ServiceMetadata) {
+    async fn save(&self, datas: Vec<ServiceMetadata>) {
         todo!()
     }
 

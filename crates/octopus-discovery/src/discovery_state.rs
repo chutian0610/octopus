@@ -7,8 +7,8 @@ pub mod replicated_state;
 /// Discovery state interface.
 /// is used to manage service metadata
 trait DiscoveryState {
-    async fn save(&self, data: ServiceMetadata);
-    async fn remove(&self, data: ServiceMetadata);
+    async fn save(&self, datas: Vec<ServiceMetadata>);
+    async fn remove(&self, datas: Vec<ServiceMetadata>);
     async fn list(
         &self,
         service_id: Option<&str>,
@@ -26,8 +26,8 @@ trait LocalDiscoveryStore {
         cluster_id: &str,
         instance_id: &str,
     ) -> Option<ServiceMetadata>;
-    async fn remove(&self, data: ServiceMetadata);
-    async fn save(&self, data: ServiceMetadata);
+    async fn remove(&self, datas: Vec<ServiceMetadata>);
+    async fn save(&self, datas: Vec<ServiceMetadata>);
     async fn list(
         &self,
         service_id: Option<&str>,
@@ -38,5 +38,5 @@ trait LocalDiscoveryStore {
 /// Remote store is used to for sync service metadata with remote store.
 #[async_trait]
 trait RemoteDiscoveryStore {
-    async fn save(&self, data: ServiceMetadata);
+    async fn save(&self, datas: Vec<ServiceMetadata>);
 }
