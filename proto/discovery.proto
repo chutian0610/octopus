@@ -1,6 +1,7 @@
 syntax = "proto3";
 package discovery;
 import "common.proto";
+import "google/protobuf/empty.proto";
 
 /* =============== Discovery Server ================= */
 
@@ -34,8 +35,17 @@ service DiscoveryService {
   rpc UnAnnounce(NodeAnnounceReq) returns (NodeAnnounceResp);
   // look up services.
   rpc LookUp(LookUpReq) returns (LookUpResp);
-
 }
+
+/* =============== Remote Store ================= */
+
+message RemoteStoreSaveResp {}
+
+service RemoteStoreService{
+  rpc Save(common.Entry) returns (RemoteStoreSaveResp);
+  rpc GetAll(google.protobuf.Empty) returns (common.EntryList);
+}
+
 /* =============== Service Health Checker ================= */
 message HealthCheckReq {
 }

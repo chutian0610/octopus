@@ -10,6 +10,20 @@ pub struct ServiceInstance {
     #[prost(int32, tag = "5")]
     pub port: i32,
 }
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Entry {
+    #[prost(bytes = "vec", tag = "1")]
+    pub key: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "vec", tag = "2")]
+    pub value: ::prost::alloc::vec::Vec<u8>,
+    #[prost(int64, tag = "3")]
+    pub version: i64,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct EntryList {
+    #[prost(message, repeated, tag = "1")]
+    pub entries: ::prost::alloc::vec::Vec<Entry>,
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum ServiceStatus {

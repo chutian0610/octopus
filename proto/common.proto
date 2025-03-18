@@ -14,3 +14,13 @@ message ServiceInstance {
   string host = 4;
   int32 port = 5;
 }
+
+message Entry{
+    bytes key = 1;
+    bytes value = 2;
+    int64 version = 3;
+}
+
+message EntryList{
+  repeated Entry entries = 1;
+}

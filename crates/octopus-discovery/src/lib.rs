@@ -18,7 +18,7 @@ pub mod discovery_client;
 pub mod discovery_server;
 
 mod discovery_state;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct ServiceMetadata {
     service_id: String,
     cluster_id: String,
