@@ -1,24 +1,44 @@
-///           ┌─────────────┐     
-///           │             │     
-///    ┌──────┼  Discovery  │     
-///    │      │    Server   │     
-///    │      │             │     
-///    │      └────────▲────┘     
-///    │               │          
-///    │LookUp         │Announce  
-///    │               │UnAnnounce
-///    │               │          
-/// ┌──▼──────────┐    │          
-/// │             │    │          
-/// │  Discovery  ┼────┘          
-/// │    Client   │               
-/// │             │               
-/// └─────────────┘  
+use serde::{Deserialize, Serialize};
+
+///           +-------------+     
+///           |             |     
+///    +------+  Discovery  |     
+///    |      |    Server   |     
+///    |      |             |     
+///    |      +--------^----+     
+///    |               |          
+///    |LookUp         |Announce  
+///    |               |UnAnnounce
+///    |               |          
+/// +--v----------+    |          
+/// |             |    |          
+/// |  Discovery  +----+          
+/// |    Client   |               
+/// |             |               
+/// +-------------+               
 pub mod discovery_client;
 pub mod discovery_server;
 
 mod discovery_state;
-#[derive(Debug, PartialEq, Eq)]
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct NodeServiceMetadata {
+    node_id: String,
+    timestamp: i64,
+    services: Vec<ServiceMetadata>,
+}
+
+impl NodeServiceMetadata {
+    pub fn new(node_id: String, timestamp: i64, services: Vec<ServiceMetadata>) -> Self {
+        Self {
+            node_id,
+            timestamp,
+            services,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ServiceMetadata {
     service_id: String,
     cluster_id: String,

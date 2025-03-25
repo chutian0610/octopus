@@ -1,12 +1,12 @@
-use crate::ServiceMetadata;
+use crate::{NodeServiceMetadata, ServiceMetadata};
 
 pub mod replicated_state;
 
 /// Discovery state interface.
 /// is used to manage service metadata
 trait DiscoveryState {
-    async fn save(&self, services: Vec<ServiceMetadata>);
-    async fn remove(&self, services: Vec<ServiceMetadata>);
+    async fn save(&self, metadata: NodeServiceMetadata);
+    async fn remove(&self, metadata: NodeServiceMetadata);
     async fn list(
         &self,
         service_id: Option<&str>,

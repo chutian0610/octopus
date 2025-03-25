@@ -1,9 +1,10 @@
 use std::time::Duration;
 
 use octopus_rpc::discovery::remote_store_service_server::RemoteStoreService;
+use serde::de::value;
 use tonic::async_trait;
 
-use crate::ServiceMetadata;
+use crate::{NodeServiceMetadata, ServiceMetadata};
 
 use super::DiscoveryState;
 
@@ -68,11 +69,11 @@ where
     L: LocalDiscoveryStore,
     R: RemoteStoreService,
 {
-    async fn save(&self, datas: Vec<ServiceMetadata>) {
+    async fn save(&self, metadata: NodeServiceMetadata) {
         todo!()
     }
 
-    async fn remove(&self, datas: Vec<ServiceMetadata>) {
+    async fn remove(&self, metadata: NodeServiceMetadata) {
         todo!()
     }
 
@@ -104,6 +105,12 @@ impl Entry {
             value,
             version,
         }
+    }
+    fn from_node_service_metadata(metadata: &NodeServiceMetadata) -> Self {
+        let key = metadata.node_id.as_bytes().to_vec();
+        let value = serde_json::to_vec(metadata).unwrap();
+        let version = metadata.timestamp;
+        Self::new(key, value, version)
     }
 }
 
