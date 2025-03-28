@@ -1,3 +1,7 @@
+use std::time::SystemTime;
+
+use octopus_common::time_util::to_millis;
+use octopus_rpc::{common::Entry, discovery::NodeAnnounceReq};
 use serde::{Deserialize, Serialize};
 
 ///           +-------------+     
@@ -35,6 +39,40 @@ impl NodeServiceMetadata {
             timestamp,
             services,
         }
+    }
+
+    fn to_entry(&self) -> Entry {
+        let key = self.node_id.as_bytes().to_vec();
+        let value = serde_json::to_vec(self).unwrap();
+        let version = self.timestamp;
+        Entry {
+            key,
+            value,
+            version,
+        }
+    }
+
+    fn from_node_announce_request(req: &NodeAnnounceReq) -> Self {
+        let timestamp = to_millis(SystemTime::now());
+        let services = req
+            .services
+            .iter()
+            .map(|service| {
+                ServiceMetadata::new(
+                    service.service_id.clone(),
+                    req.cluster_id.clone(),
+                    req.instance_id.clone(),
+                    service.host.clone(),
+                    service.port,
+                    timestamp,
+                )
+            })
+            .collect();
+        Self::new(
+            format!("{}/{}", req.cluster_id, req.instance_id),
+            timestamp,
+            services,
+        )
     }
 }
 

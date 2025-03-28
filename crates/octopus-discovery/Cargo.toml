@@ -5,10 +5,14 @@ edition = "2021"
 
 [dependencies]
 
-octopus-rpc = { version = "0.1.0", path = "../octopus-rpc" }
+octopus-rpc = { path = "../octopus-rpc" }
+octopus-common = { path = "../octopus-common" }
+
 tonic = { workspace = true }
 dashmap = { workspace = true }
 async-trait = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
+anyhow = { workspace = true }
+
 [build-dependencies]

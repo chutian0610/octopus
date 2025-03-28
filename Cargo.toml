@@ -1,6 +1,10 @@
 [workspace]
 
-members = ["crates/octopus-rpc", "crates/octopus-discovery"]
+members = [
+    "crates/octopus-rpc",
+    "crates/octopus-discovery",
+    "crates/octopus-common",
+]
 resolver = "2"
 
 [workspace.dependencies]
@@ -17,3 +21,6 @@ dashmap = { version = "6.1.0" }
 async-trait = { version = "0.1.88" }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = { version = "1.0.140" }
+
+# Error Handling
+anyhow = { version = "1.0.97" }

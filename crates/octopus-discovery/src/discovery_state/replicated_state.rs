@@ -1,10 +1,9 @@
 use std::time::Duration;
 
-use octopus_rpc::discovery::remote_store_service_server::RemoteStoreService;
-use serde::de::value;
-use tonic::async_trait;
-
-use crate::{NodeServiceMetadata, ServiceMetadata};
+use crate::NodeServiceMetadata;
+use anyhow::{Ok, Result};
+use octopus_rpc::{common::Entry, discovery::remote_store_service_server::RemoteStoreService};
+use tonic::{async_trait, Request};
 
 use super::DiscoveryState;
 
@@ -32,26 +31,22 @@ use super::DiscoveryState;
 ///           │  Discovery  │       
 ///           │   Server    │       
 ///           └─────────────┘       
-struct ReplicatedState<L: LocalDiscoveryStore, R: RemoteStoreService> {
+struct ReplicatedState {
     /// The local store.
-    local: L,
+    local: Box<dyn LocalDiscoveryStore>,
     /// The remote store.
-    remote: R,
+    remote: Box<dyn RemoteStoreService>,
     /// replicator.
     replicator: Replicator,
     /// the replicated state config.
     replicated_state_config: ReplicatedStateConfig,
 }
 
-impl<L, R> ReplicatedState<L, R>
-where
-    L: LocalDiscoveryStore,
-    R: RemoteStoreService,
-{
+impl ReplicatedState {
     /// Create a new replicated state.
     pub fn new(
-        local: L,
-        remote: R,
+        local: Box<dyn LocalDiscoveryStore>,
+        remote: Box<dyn RemoteStoreService>,
         replicator: Replicator,
         replicated_state_config: ReplicatedStateConfig,
     ) -> Self {
@@ -64,16 +59,17 @@ where
     }
 }
 
-impl<L, R> DiscoveryState for ReplicatedState<L, R>
-where
-    L: LocalDiscoveryStore,
-    R: RemoteStoreService,
-{
-    async fn save(&self, metadata: NodeServiceMetadata) {
-        todo!()
+impl DiscoveryState for ReplicatedState {
+    async fn save(&self, metadata: NodeServiceMetadata) -> Result<()> {
+        let meta = &metadata;
+        // save to local store
+        self.local.save(meta.to_entry()).await;
+        // save to remote store
+        let _response = self.remote.save(Request::new(meta.to_entry())).await;
+        Ok(())
     }
 
-    async fn remove(&self, metadata: NodeServiceMetadata) {
+    async fn remove(&self, metadata: NodeServiceMetadata) -> Result<()> {
         todo!()
     }
 
@@ -81,7 +77,7 @@ where
         &self,
         service_id: Option<&str>,
         cluster_id: Option<&str>,
-    ) -> Vec<crate::ServiceMetadata> {
+    ) -> Result<Vec<crate::ServiceMetadata>> {
         todo!()
     }
 }
@@ -92,28 +88,6 @@ struct ReplicatedStateConfig {
     tombstone_interval: Duration,
 }
 
-#[derive(Debug)]
-struct Entry {
-    key: Vec<u8>,
-    value: Vec<u8>,
-    version: i64,
-}
-impl Entry {
-    fn new(key: Vec<u8>, value: Vec<u8>, version: i64) -> Self {
-        Self {
-            key,
-            value,
-            version,
-        }
-    }
-    fn from_node_service_metadata(metadata: &NodeServiceMetadata) -> Self {
-        let key = metadata.node_id.as_bytes().to_vec();
-        let value = serde_json::to_vec(metadata).unwrap();
-        let version = metadata.timestamp;
-        Self::new(key, value, version)
-    }
-}
-
 /// Local store interface.
 /// Local store is used to store service metadata locally.
 #[async_trait]
@@ -122,12 +96,6 @@ trait LocalDiscoveryStore {
     async fn remove(&self, data: Entry);
     async fn save(&self, data: Entry);
     async fn get_all(&self) -> Vec<Entry>;
-}
-/// Remote store interface.
-/// Remote store is used to for sync service metadata with remote store.
-#[async_trait]
-trait RemoteDiscoveryStore {
-    async fn save(&self, datas: Vec<Entry>);
 }
 
 struct Replicator {}
