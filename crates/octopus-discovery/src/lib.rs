@@ -55,6 +55,11 @@ impl From<&NodeServiceMetadata> for Entry {
         }
     }
 }
+impl From<Entry> for NodeServiceMetadata {
+    fn from(item: Entry) -> Self {
+        return serde_json::from_slice(&item.value).unwrap();
+    }
+}
 
 impl From<&NodeAnnounceReq> for NodeServiceMetadata {
     fn from(req: &NodeAnnounceReq) -> Self {

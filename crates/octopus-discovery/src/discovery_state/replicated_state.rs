@@ -1,6 +1,6 @@
-use std::{sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration, vec};
 
-use crate::NodeServiceMetadata;
+use crate::{NodeServiceMetadata, ServiceMetadata};
 use anyhow::{Ok, Result};
 use octopus_rpc::{common::Entry, discovery::remote_store_service_server::RemoteStoreService};
 use tonic::{async_trait, Request};
@@ -66,6 +66,15 @@ impl DiscoveryState for ReplicatedState {
     }
 
     async fn remove(&self, metadata: &NodeServiceMetadata) -> Result<()> {
+        let key = metadata.node_id.as_bytes().to_vec();
+        let value: Vec<u8> = vec![];
+        let version = metadata.timestamp;
+        let entry: Entry = Entry {
+            key,
+            value,
+            version,
+        };
+        self.local.save(&entry).await;
         Ok(())
     }
 
@@ -73,8 +82,25 @@ impl DiscoveryState for ReplicatedState {
         &self,
         service_id: Option<&str>,
         cluster_id: Option<&str>,
-    ) -> Result<Vec<crate::ServiceMetadata>> {
-        todo!()
+    ) -> Result<Vec<ServiceMetadata>> {
+        let metas = self
+            .local
+            .get_all()
+            .await
+            .into_iter()
+            .map(|entry| NodeServiceMetadata::from(entry))
+            .flat_map(|metadata| metadata.services)
+            .filter(|metadata| {
+                if service_id.is_some() && metadata.service_id != service_id.unwrap() {
+                    return false;
+                }
+                if cluster_id.is_some() && metadata.cluster_id != cluster_id.unwrap() {
+                    return false;
+                }
+                return true;
+            })
+            .collect();
+        Ok(metas)
     }
 }
 
@@ -102,10 +128,10 @@ impl LocalDiscoveryStore for InMemoryStore {
     async fn get(&self, key: &str) -> Option<Entry> {
         todo!()
     }
-    async fn remove(&self, data: Entry) {
+    async fn remove(&self, data: &Entry) {
         todo!()
     }
-    async fn save(&self, data: Entry) {
+    async fn save(&self, data: &Entry) {
         todo!()
     }
     async fn get_all(&self) -> Vec<Entry> {
