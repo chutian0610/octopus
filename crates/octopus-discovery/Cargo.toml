@@ -9,6 +9,7 @@ octopus-rpc = { path = "../octopus-rpc" }
 octopus-common = { path = "../octopus-common" }
 
 tonic = { workspace = true }
+tonic-types = { workspace = true }
 dashmap = { workspace = true }
 async-trait = { workspace = true }
 serde_json = { workspace = true }

@@ -1,7 +1,10 @@
 use std::time::SystemTime;
 
 use octopus_common::time_util::to_millis;
-use octopus_rpc::{common::Entry, discovery::NodeAnnounceReq};
+use octopus_rpc::{
+    common::{Entry, ServiceInstance},
+    discovery::NodeAnnounceReq,
+};
 use serde::{Deserialize, Serialize};
 
 ///           +-------------+     
@@ -31,7 +34,6 @@ pub struct NodeServiceMetadata {
     timestamp: i64,
     services: Vec<ServiceMetadata>,
 }
-
 impl NodeServiceMetadata {
     pub fn new(node_id: String, timestamp: i64, services: Vec<ServiceMetadata>) -> Self {
         Self {
@@ -40,19 +42,22 @@ impl NodeServiceMetadata {
             services,
         }
     }
-
-    fn to_entry(&self) -> Entry {
-        let key = self.node_id.as_bytes().to_vec();
-        let value = serde_json::to_vec(self).unwrap();
-        let version = self.timestamp;
+}
+impl From<&NodeServiceMetadata> for Entry {
+    fn from(item: &NodeServiceMetadata) -> Self {
+        let key = item.node_id.as_bytes().to_vec();
+        let value = serde_json::to_vec(item).unwrap();
+        let version = item.timestamp;
         Entry {
             key,
             value,
             version,
         }
     }
+}
 
-    fn from_node_announce_request(req: &NodeAnnounceReq) -> Self {
+impl From<&NodeAnnounceReq> for NodeServiceMetadata {
+    fn from(req: &NodeAnnounceReq) -> Self {
         let timestamp = to_millis(SystemTime::now());
         let services = req
             .services
@@ -68,14 +73,13 @@ impl NodeServiceMetadata {
                 )
             })
             .collect();
-        Self::new(
+        NodeServiceMetadata::new(
             format!("{}/{}", req.cluster_id, req.instance_id),
             timestamp,
             services,
         )
     }
 }
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ServiceMetadata {
     service_id: String,
@@ -84,6 +88,17 @@ pub struct ServiceMetadata {
     host: String,
     port: i32,
     timestamp: i64,
+}
+
+impl From<ServiceMetadata> for ServiceInstance {
+    fn from(item: ServiceMetadata) -> Self {
+        ServiceInstance {
+            service_id: item.service_id,
+            instance_id: item.instance_id,
+            host: item.host,
+            port: item.port,
+        }
+    }
 }
 
 impl ServiceMetadata {

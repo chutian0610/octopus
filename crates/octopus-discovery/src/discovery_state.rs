@@ -8,8 +8,8 @@ pub mod replicated_state;
 
 #[async_trait]
 pub trait DiscoveryState: Send + Sync {
-    async fn save(&self, metadata: NodeServiceMetadata) -> Result<()>;
-    async fn remove(&self, metadata: NodeServiceMetadata) -> Result<()>;
+    async fn save(&self, metadata: &NodeServiceMetadata) -> Result<()>;
+    async fn remove(&self, metadata: &NodeServiceMetadata) -> Result<()>;
     async fn list(
         &self,
         service_id: Option<&str>,

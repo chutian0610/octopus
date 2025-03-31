@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use crate::NodeServiceMetadata;
 use anyhow::{Ok, Result};
@@ -33,9 +33,9 @@ use super::DiscoveryState;
 ///           └─────────────┘       
 struct ReplicatedState {
     /// The local store.
-    local: Box<dyn LocalDiscoveryStore>,
+    local: Arc<dyn LocalDiscoveryStore>,
     /// The remote store.
-    remote: Box<dyn RemoteStoreService>,
+
     /// replicator.
     replicator: Replicator,
     /// the replicated state config.
@@ -45,32 +45,28 @@ struct ReplicatedState {
 impl ReplicatedState {
     /// Create a new replicated state.
     pub fn new(
-        local: Box<dyn LocalDiscoveryStore>,
-        remote: Box<dyn RemoteStoreService>,
+        local: Arc<dyn LocalDiscoveryStore>,
         replicator: Replicator,
         replicated_state_config: ReplicatedStateConfig,
     ) -> Self {
         Self {
             local,
-            remote,
             replicator,
             replicated_state_config,
         }
     }
 }
 
+#[async_trait]
 impl DiscoveryState for ReplicatedState {
-    async fn save(&self, metadata: NodeServiceMetadata) -> Result<()> {
-        let meta = &metadata;
+    async fn save(&self, metadata: &NodeServiceMetadata) -> Result<()> {
         // save to local store
-        self.local.save(meta.to_entry()).await;
-        // save to remote store
-        let _response = self.remote.save(Request::new(meta.to_entry())).await;
+        self.local.save(&Entry::from(metadata)).await;
         Ok(())
     }
 
-    async fn remove(&self, metadata: NodeServiceMetadata) -> Result<()> {
-        todo!()
+    async fn remove(&self, metadata: &NodeServiceMetadata) -> Result<()> {
+        Ok(())
     }
 
     async fn list(
@@ -91,10 +87,10 @@ struct ReplicatedStateConfig {
 /// Local store interface.
 /// Local store is used to store service metadata locally.
 #[async_trait]
-trait LocalDiscoveryStore {
+trait LocalDiscoveryStore: Send + Sync {
     async fn get(&self, key: &str) -> Option<Entry>;
-    async fn remove(&self, data: Entry);
-    async fn save(&self, data: Entry);
+    async fn remove(&self, data: &Entry);
+    async fn save(&self, data: &Entry);
     async fn get_all(&self) -> Vec<Entry>;
 }
 

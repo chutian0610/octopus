@@ -20,8 +20,8 @@ message ServiceAnnounceReq{
 message NodeAnnounceResp {}
 
 message LookUpReq {
-  string service_id = 1;
-  string cluster_id = 2;
+  optional string service_id = 1;
+  optional string cluster_id = 2;
 }
 
 message LookUpResp {
