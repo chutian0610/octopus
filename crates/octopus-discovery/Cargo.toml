@@ -11,6 +11,7 @@ octopus-common = { path = "../octopus-common" }
 tonic = { workspace = true }
 tonic-types = { workspace = true }
 dashmap = { workspace = true }
+papaya = { workspace = true }
 async-trait = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
