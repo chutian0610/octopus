@@ -140,10 +140,16 @@ impl InMemoryStore {
 #[async_trait]
 impl LocalDiscoveryStore for InMemoryStore {
     async fn get(&self, key: &str) -> Option<Entry> {
-        todo!()
+        let map = self.map.pin();
+        let result = map.get(key.as_bytes());
+        match result {
+            Some(entry) => Some(entry.clone()),
+            None => None,
+        }
     }
     async fn remove(&self, data: Entry) {
-        todo!()
+        let map = self.map.pin();
+        let _result = map.remove(&data.key);
     }
     async fn save(&self, data: Entry) {
         let map = self.map.pin();
@@ -172,7 +178,12 @@ impl LocalDiscoveryStore for InMemoryStore {
         }
     }
     async fn get_all(&self) -> Vec<Entry> {
-        todo!()
+        let map = self.map.pin();
+        let mut result = vec![];
+        for (_, entry) in map.iter() {
+            result.push(entry.clone());
+        }
+        result
     }
 }
 fn resolve(a: &Entry, b: &Entry) -> Entry {
