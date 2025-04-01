@@ -21,6 +21,7 @@ tonic-build = { version = "0.13.0", default-features = false, features = [
 ] }
 tonic-types = { version = "0.13.0" }
 
+derive_builder = { version = "0.20.2" }
 papaya = { version = "0.2.1" }
 dashmap = { version = "6.1.0" }
 async-trait = { version = "0.1.88" }
