@@ -1,11 +1,9 @@
-use std::{collections::btree_map::OccupiedEntry, sync::Arc, time::Duration, vec};
+use std::{sync::Arc, time::Duration};
 
-use crate::{NodeServiceMetadata, ServiceMetadata};
 use anyhow::{Ok, Result};
-use dashmap::DashMap;
-use octopus_rpc::{common::Entry, discovery::remote_store_service_server::RemoteStoreService};
+use octopus_rpc::common::{Entry, NodeEntry, NodeMetadata, ServiceMetadata};
 use papaya::Operation;
-use tonic::{async_trait, Request};
+use tonic::async_trait;
 
 use super::DiscoveryState;
 
@@ -61,23 +59,19 @@ impl ReplicatedState {
 
 #[async_trait]
 impl DiscoveryState for ReplicatedState {
-    async fn save(&self, metadata: &NodeServiceMetadata) -> Result<()> {
+    async fn save(&self, metadata: &NodeMetadata) -> Result<()> {
         // save to local store
-        self.local.save(Entry::from(metadata)).await;
+        self.local
+            .save(NodeEntry::from_register_node_metadata(metadata))
+            .await;
         Ok(())
     }
 
-    async fn remove(&self, metadata: &NodeServiceMetadata) -> Result<()> {
-        let key = metadata.node_id.as_bytes().to_vec();
-        let value: Vec<u8> = vec![];
-        let version = metadata.timestamp;
-        let entry: Entry = Entry {
-            key,
-            value,
-            version,
-        };
+    async fn remove(&self, metadata: &NodeMetadata) -> Result<()> {
         // use empty value to mark the entry as tombstone
-        self.local.save(entry).await;
+        self.local
+            .save(NodeEntry::from_unregister_node_metadata(metadata))
+            .await;
         Ok(())
     }
 
@@ -91,7 +85,8 @@ impl DiscoveryState for ReplicatedState {
             .get_all()
             .await
             .into_iter()
-            .map(|entry| NodeServiceMetadata::from(entry))
+            .filter(|entry| entry.meta.is_some())
+            .map(|entry| entry.meta.unwrap())
             .flat_map(|metadata| metadata.services)
             .filter(|metadata| {
                 if service_id.is_some() && metadata.service_id != service_id.unwrap() {
@@ -120,42 +115,42 @@ struct Replicator {}
 /// Local store is used to store service metadata locally.
 #[async_trait]
 trait LocalDiscoveryStore: Send + Sync {
-    async fn get(&self, key: &str) -> Option<Entry>;
-    async fn remove(&self, data: Entry);
-    async fn save(&self, data: Entry);
-    async fn get_all(&self) -> Vec<Entry>;
+    async fn get(&self, key: &str) -> Option<NodeEntry>;
+    async fn remove(&self, data: NodeEntry);
+    async fn save(&self, data: NodeEntry);
+    async fn get_all(&self) -> Vec<NodeEntry>;
 }
 struct InMemoryStore {
-    map: papaya::HashMap<Vec<u8>, Entry>,
+    map: papaya::HashMap<String, NodeEntry>,
 }
 
 impl InMemoryStore {
     pub fn new() -> Self {
         Self {
-            map: papaya::HashMap::<Vec<u8>, Entry>::new(),
+            map: papaya::HashMap::<String, NodeEntry>::new(),
         }
     }
 }
 
 #[async_trait]
 impl LocalDiscoveryStore for InMemoryStore {
-    async fn get(&self, key: &str) -> Option<Entry> {
+    async fn get(&self, key: &str) -> Option<NodeEntry> {
         let map = self.map.pin();
-        let result = map.get(key.as_bytes());
+        let result = map.get(key);
         match result {
             Some(entry) => Some(entry.clone()),
             None => None,
         }
     }
-    async fn remove(&self, data: Entry) {
+    async fn remove(&self, data: NodeEntry) {
         let map = self.map.pin();
-        let _result = map.remove(&data.key);
+        let _result = map.remove(&data.node_id);
     }
-    async fn save(&self, data: Entry) {
+    async fn save(&self, data: NodeEntry) {
         let map = self.map.pin();
         let mut flag = false;
         while !flag {
-            let old = map.get_or_insert_with(data.key.clone(), || data.clone());
+            let old = map.get_or_insert_with(data.node_id.clone(), || data.clone());
             flag = true;
             if old != &data {
                 let new = resolve(old, &data);
@@ -167,7 +162,7 @@ impl LocalDiscoveryStore for InMemoryStore {
                     // Do nothing if the key does not exist
                     None => Operation::Abort(()),
                 };
-                let compute = map.compute(data.key.clone(), compute);
+                let compute = map.compute(data.node_id.clone(), compute);
                 match compute {
                     papaya::Compute::Inserted(_, _) => flag = false,
                     papaya::Compute::Updated { old: _, new: _ } => flag = true, // overwrite the flag if value is updated
@@ -177,7 +172,7 @@ impl LocalDiscoveryStore for InMemoryStore {
             }
         }
     }
-    async fn get_all(&self) -> Vec<Entry> {
+    async fn get_all(&self) -> Vec<NodeEntry> {
         let map = self.map.pin();
         let mut result = vec![];
         for (_, entry) in map.iter() {
@@ -186,10 +181,10 @@ impl LocalDiscoveryStore for InMemoryStore {
         result
     }
 }
-fn resolve(a: &Entry, b: &Entry) -> Entry {
-    if a.version > b.version {
+fn resolve(a: &NodeEntry, b: &NodeEntry) -> NodeEntry {
+    if a.timestamp > b.timestamp {
         a.clone()
-    } else if a.version < b.version {
+    } else if a.timestamp < b.timestamp {
         b.clone()
     } else {
         a.clone()

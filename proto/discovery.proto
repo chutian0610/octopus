@@ -9,6 +9,7 @@ message NodeAnnounceReq {
   string cluster_id = 1;
   string instance_id = 2;
   repeated ServiceAnnounceReq services = 3;
+  int64 timestamp = 4;
 }
 
 message ServiceAnnounceReq{
@@ -25,7 +26,7 @@ message LookUpReq {
 }
 
 message LookUpResp {
-  repeated common.ServiceInstance instances = 1;
+  repeated common.ServiceMetadata services = 1;
 }
 
 service DiscoveryService {

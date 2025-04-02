@@ -7,6 +7,8 @@ pub struct NodeAnnounceReq {
     pub instance_id: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "3")]
     pub services: ::prost::alloc::vec::Vec<ServiceAnnounceReq>,
+    #[prost(int64, tag = "4")]
+    pub timestamp: i64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServiceAnnounceReq {
@@ -29,7 +31,7 @@ pub struct LookUpReq {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LookUpResp {
     #[prost(message, repeated, tag = "1")]
-    pub instances: ::prost::alloc::vec::Vec<super::common::ServiceInstance>,
+    pub services: ::prost::alloc::vec::Vec<super::common::ServiceMetadata>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct RemoteStoreSaveResp {}

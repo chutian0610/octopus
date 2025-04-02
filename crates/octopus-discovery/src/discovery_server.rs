@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use crate::{discovery_state::DiscoveryState, NodeServiceMetadata};
+use crate::discovery_state::DiscoveryState;
 use octopus_rpc::{
-    common::ServiceInstance,
+    common::NodeMetadata,
     discovery::{
         discovery_service_server::DiscoveryService, LookUpReq, LookUpResp, NodeAnnounceReq,
         NodeAnnounceResp,
@@ -27,7 +27,7 @@ impl DiscoveryService for DiscoveryServer {
         request: Request<NodeAnnounceReq>,
     ) -> Result<Response<NodeAnnounceResp>, Status> {
         let req = request.into_inner();
-        let result = self.state.save(&NodeServiceMetadata::from(&req)).await;
+        let result = self.state.save(&NodeMetadata::from(&req)).await;
         match result {
             Ok(_) => Ok(Response::new(NodeAnnounceResp {})),
             Err(e) => Err(Status::internal(format!("Node Announce failed: {}", e))),
@@ -38,7 +38,7 @@ impl DiscoveryService for DiscoveryServer {
         request: Request<NodeAnnounceReq>,
     ) -> Result<Response<NodeAnnounceResp>, Status> {
         let req = request.into_inner();
-        let result = self.state.remove(&NodeServiceMetadata::from(&req)).await;
+        let result = self.state.remove(&NodeMetadata::from(&req)).await;
         match result {
             Ok(_) => Ok(Response::new(NodeAnnounceResp {})),
             Err(e) => Err(Status::internal(format!("Node UnAnnounce failed: {}", e))),
@@ -67,12 +67,7 @@ impl DiscoveryService for DiscoveryServer {
             )
             .await;
         match result {
-            Ok(value) => Ok(Response::new(LookUpResp {
-                instances: value
-                    .into_iter()
-                    .map(|s| ServiceInstance::from(s))
-                    .collect(),
-            })),
+            Ok(value) => Ok(Response::new(LookUpResp { services: value })),
             Err(e) => Err(Status::internal(format!(
                 "look up services with option[{}] failed: {}",
                 option_str(req.service_id.as_ref(), req.cluster_id.as_ref()),
