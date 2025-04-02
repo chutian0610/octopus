@@ -33,18 +33,9 @@ pub struct NodeEntry {
     pub timestamp: i64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Entry {
-    #[prost(bytes = "vec", tag = "1")]
-    pub key: ::prost::alloc::vec::Vec<u8>,
-    #[prost(bytes = "vec", tag = "2")]
-    pub value: ::prost::alloc::vec::Vec<u8>,
-    #[prost(int64, tag = "3")]
-    pub version: i64,
-}
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct EntryList {
+pub struct NodeEntryList {
     #[prost(message, repeated, tag = "1")]
-    pub entries: ::prost::alloc::vec::Vec<Entry>,
+    pub entries: ::prost::alloc::vec::Vec<NodeEntry>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]

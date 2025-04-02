@@ -1,7 +1,10 @@
 use std::{sync::Arc, time::Duration};
 
 use anyhow::{Ok, Result};
-use octopus_rpc::common::{Entry, NodeEntry, NodeMetadata, ServiceMetadata};
+use octopus_rpc::{
+    common::{NodeEntry, NodeMetadata, ServiceMetadata},
+    extends::resolve,
+};
 use papaya::Operation;
 use tonic::async_trait;
 
@@ -150,13 +153,15 @@ impl LocalDiscoveryStore for InMemoryStore {
         let map = self.map.pin();
         let mut flag = false;
         while !flag {
-            let old = map.get_or_insert_with(data.node_id.clone(), || data.clone());
+            let old_entry = map.get_or_insert_with(data.node_id.clone(), || data.clone());
             flag = true;
-            if old != &data {
-                let new = resolve(old, &data);
+            if old_entry != &data {
+                let new_entry = resolve(old_entry, &data);
                 let compute = |entry| match entry {
                     // overwrite the value if it is same as old.
-                    Some((_key, value)) if value == old => Operation::Insert(new.clone()),
+                    Some((_key, value)) if value == old_entry => {
+                        Operation::Insert(new_entry.clone())
+                    }
                     // Do nothing if it is differnet from old.
                     Some((_key, _value)) => Operation::Abort(()),
                     // Do nothing if the key does not exist
@@ -181,12 +186,11 @@ impl LocalDiscoveryStore for InMemoryStore {
         result
     }
 }
-fn resolve(a: &NodeEntry, b: &NodeEntry) -> NodeEntry {
-    if a.timestamp > b.timestamp {
-        a.clone()
-    } else if a.timestamp < b.timestamp {
-        b.clone()
-    } else {
-        a.clone()
-    }
+
+/// remote store interface.
+/// remote store is used to sync service metadata.
+#[async_trait]
+trait RemoteDiscoveryStore: Send + Sync {
+    async fn save(&self, data: NodeEntry);
+    async fn get_all(&self) -> Vec<NodeEntry>;
 }

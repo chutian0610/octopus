@@ -29,12 +29,6 @@ message NodeEntry{
   int64 timestamp = 3;
 }
 
-message Entry{
-    bytes key = 1;
-    bytes value = 2;
-    int64 version = 3;
-}
-
-message EntryList{
-  repeated Entry entries = 1;
+message NodeEntryList{
+  repeated NodeEntry entries = 1;
 }
