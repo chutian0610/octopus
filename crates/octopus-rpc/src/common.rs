@@ -11,8 +11,8 @@ pub struct ServiceMetadata {
     pub host: ::prost::alloc::string::String,
     #[prost(int32, tag = "5")]
     pub port: i32,
-    #[prost(int64, tag = "6")]
-    pub timestamp: i64,
+    #[prost(uint64, tag = "6")]
+    pub timestamp: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NodeMetadata {
@@ -20,8 +20,8 @@ pub struct NodeMetadata {
     pub node_id: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "2")]
     pub services: ::prost::alloc::vec::Vec<ServiceMetadata>,
-    #[prost(int64, tag = "3")]
-    pub timestamp: i64,
+    #[prost(uint64, tag = "3")]
+    pub timestamp: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NodeEntry {
@@ -29,8 +29,8 @@ pub struct NodeEntry {
     pub node_id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
     pub meta: ::core::option::Option<NodeMetadata>,
-    #[prost(int64, tag = "3")]
-    pub timestamp: i64,
+    #[prost(uint64, tag = "3")]
+    pub timestamp: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NodeEntryList {

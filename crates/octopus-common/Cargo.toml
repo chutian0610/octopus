@@ -6,5 +6,7 @@ edition = "2021"
 [dependencies]
 
 anyhow = { workspace = true }
+chrono = { workspace = true }
+chrono-tz = { workspace = true }
 
 [build-dependencies]

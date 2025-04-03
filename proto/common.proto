@@ -14,19 +14,19 @@ message ServiceMetadata {
   string instance_id = 3;
   string host = 4;
   int32 port = 5;
-  int64 timestamp = 6;
+  uint64 timestamp = 6;
 }
 
 message NodeMetadata {
   string node_id = 1;
   repeated ServiceMetadata services = 2;
-  int64 timestamp = 3;
+  uint64 timestamp = 3;
 }
 
 message NodeEntry{
   string node_id = 1;
   optional NodeMetadata meta = 2;
-  int64 timestamp = 3;
+  uint64 timestamp = 3;
 }
 
 message NodeEntryList{

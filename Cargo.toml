@@ -9,25 +9,29 @@ resolver = "2"
 
 [workspace.dependencies]
 
-tokio = { version = "1.44.1" }
-prost = { version = "0.13.5" }
-prost-types = { version = "0.13.5" }
+tokio = { version = "1.44" }
+prost = { version = "0.13" }
+prost-types = { version = "0.13" }
 
 
-tonic = { version = "0.13.0" }
-tonic-build = { version = "0.13.0", default-features = false, features = [
+tonic = { version = "0.13" }
+tonic-build = { version = "0.13", default-features = false, features = [
     "transport",
     "prost",
 ] }
-tonic-types = { version = "0.13.0" }
+tonic-types = { version = "0.13" }
 
-derive_builder = { version = "0.20.2" }
-papaya = { version = "0.2.1" }
-dashmap = { version = "6.1.0" }
-async-trait = { version = "0.1.88" }
-serde = { version = "1.0.219", features = ["derive"] }
-serde_json = { version = "1.0.140" }
+derive_builder = { version = "0.20" }
+papaya = { version = "0.2" }
+dashmap = { version = "6.1" }
+async-trait = { version = "0.1" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
 
 # Error Handling
-anyhow = { version = "1.0.97" }
-thiserror = { version = "2.0.12" }
+anyhow = { version = "1.0" }
+thiserror = { version = "2.0" }
+
+# Time
+chrono = { version = "0.4" }
+chrono-tz = { version = "0.10" }

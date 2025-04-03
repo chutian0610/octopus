@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Duration};
 use anyhow::{Ok, Result};
 use octopus_rpc::{
     common::{NodeEntry, NodeMetadata, ServiceMetadata},
-    extends::resolve,
+    extends::resolve_optional_node_entry,
 };
 use papaya::Operation;
 use tonic::async_trait;
@@ -14,12 +14,12 @@ use super::DiscoveryState;
 /// │  Replicator  │                
 /// │  (Shceduled) ◄─────fetch─┐    
 /// └──────┬───────┘           │    
-///        Sync                │    
+///        Sync  Remot         │    
 ///        │                   │    
 ///    ┌───▼──────┐     ┌──────┼───┐
 ///    │   Local  │     │  Remote  │
 ///    └───▲──────┘     └──────▲───┘
-///        │                   │    
+///       sync               Async    
 ///        │  ┌─────────────┐  │    
 ///        └──┼  Replicated │──┘    
 ///           │    Store    │       
@@ -124,6 +124,7 @@ trait LocalDiscoveryStore: Send + Sync {
     async fn get_all(&self) -> Vec<NodeEntry>;
 }
 struct InMemoryStore {
+    /// lock-free map.
     map: papaya::HashMap<String, NodeEntry>,
 }
 
@@ -153,27 +154,24 @@ impl LocalDiscoveryStore for InMemoryStore {
         let map = self.map.pin();
         let mut flag = false;
         while !flag {
-            let old_entry = map.get_or_insert_with(data.node_id.clone(), || data.clone());
-            flag = true;
-            if old_entry != &data {
-                let new_entry = resolve(old_entry, &data);
-                let compute = |entry| match entry {
-                    // overwrite the value if it is same as old.
-                    Some((_key, value)) if value == old_entry => {
-                        Operation::Insert(new_entry.clone())
-                    }
-                    // Do nothing if it is differnet from old.
-                    Some((_key, _value)) => Operation::Abort(()),
-                    // Do nothing if the key does not exist
-                    None => Operation::Abort(()),
-                };
-                let compute = map.compute(data.node_id.clone(), compute);
-                match compute {
-                    papaya::Compute::Inserted(_, _) => flag = false,
-                    papaya::Compute::Updated { old: _, new: _ } => flag = true, // overwrite the flag if value is updated
-                    papaya::Compute::Removed(_, _) => flag = false,
-                    papaya::Compute::Aborted(_) => flag = false,
+            let old_entry: Option<&NodeEntry> = map.get(&data.node_id);
+            let new_entry = resolve_optional_node_entry(old_entry, &data);
+            let compute = |entry| match entry {
+                // overwrite the value if old present and current is same as old .
+                Some((_key, value)) if old_entry.is_some() && value == old_entry.unwrap() => {
+                    Operation::Insert(new_entry.clone())
                 }
+                // overwrite the value if old not present and current key does not exist .
+                None if old_entry.is_none() => Operation::Insert(new_entry.clone()),
+                // otherwise do nothing.
+                _ => Operation::Abort(()),
+            };
+            let compute = map.compute(data.node_id.clone(), compute);
+            match compute {
+                papaya::Compute::Inserted(_, _) => flag = true, // overwrite the flag if value is inserted
+                papaya::Compute::Updated { old: _, new: _ } => flag = true, // overwrite the flag if value is updated
+                papaya::Compute::Removed(_, _) => flag = false,
+                papaya::Compute::Aborted(_) => flag = false,
             }
         }
     }

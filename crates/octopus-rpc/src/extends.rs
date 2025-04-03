@@ -26,7 +26,16 @@ impl From<&NodeAnnounceReq> for NodeMetadata {
 }
 
 /// resolve the entry with the new entry.
-pub fn resolve<'a>(a: &'a NodeEntry, b: &'a NodeEntry) -> &'a NodeEntry {
+pub fn resolve_optional_node_entry<'a>(
+    a: Option<&'a NodeEntry>,
+    b: &'a NodeEntry,
+) -> &'a NodeEntry {
+    if a.is_none() {
+        return b;
+    }
+    resolve_node_entry(a.unwrap(), b)
+}
+pub fn resolve_node_entry<'a>(a: &'a NodeEntry, b: &'a NodeEntry) -> &'a NodeEntry {
     if a.timestamp > b.timestamp {
         a
     } else if a.timestamp < b.timestamp {

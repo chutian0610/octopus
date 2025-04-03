@@ -9,7 +9,7 @@ message NodeAnnounceReq {
   string cluster_id = 1;
   string instance_id = 2;
   repeated ServiceAnnounceReq services = 3;
-  int64 timestamp = 4;
+  uint64 timestamp = 4;
 }
 
 message ServiceAnnounceReq{

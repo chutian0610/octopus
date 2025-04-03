@@ -7,8 +7,8 @@ pub struct NodeAnnounceReq {
     pub instance_id: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "3")]
     pub services: ::prost::alloc::vec::Vec<ServiceAnnounceReq>,
-    #[prost(int64, tag = "4")]
-    pub timestamp: i64,
+    #[prost(uint64, tag = "4")]
+    pub timestamp: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServiceAnnounceReq {

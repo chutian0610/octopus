@@ -15,7 +15,5 @@
 /// |             |               
 /// +-------------+               
 #[warn(dead_code)]
-pub mod discovery_client;
 pub mod discovery_server;
-
 mod discovery_state;
