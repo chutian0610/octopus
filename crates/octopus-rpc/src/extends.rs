@@ -1,5 +1,5 @@
 use crate::{
-    common::{NodeEntry, NodeMetadata, ServiceMetadata},
+    common::{NodeMetadata, ServiceMetadata},
     discovery::NodeAnnounceReq,
 };
 
@@ -27,15 +27,15 @@ impl From<&NodeAnnounceReq> for NodeMetadata {
 
 /// resolve the entry with the new entry.
 pub fn resolve_optional_node_entry<'a>(
-    a: Option<&'a NodeEntry>,
-    b: &'a NodeEntry,
-) -> &'a NodeEntry {
+    a: Option<&'a NodeMetadata>,
+    b: &'a NodeMetadata,
+) -> &'a NodeMetadata {
     if a.is_none() {
         return b;
     }
     resolve_node_entry(a.unwrap(), b)
 }
-pub fn resolve_node_entry<'a>(a: &'a NodeEntry, b: &'a NodeEntry) -> &'a NodeEntry {
+pub fn resolve_node_entry<'a>(a: &'a NodeMetadata, b: &'a NodeMetadata) -> &'a NodeMetadata {
     if a.timestamp > b.timestamp {
         a
     } else if a.timestamp < b.timestamp {
@@ -44,18 +44,11 @@ pub fn resolve_node_entry<'a>(a: &'a NodeEntry, b: &'a NodeEntry) -> &'a NodeEnt
         a
     }
 }
-impl NodeEntry {
-    pub fn from_register_node_metadata(value: &NodeMetadata) -> Self {
-        NodeEntry {
+impl NodeMetadata {
+    pub fn to_unregister_node_metadata(value: &NodeMetadata) -> Self {
+        NodeMetadata {
             node_id: value.node_id.clone(),
-            meta: Option::Some(value.clone()),
-            timestamp: value.timestamp,
-        }
-    }
-    pub fn from_unregister_node_metadata(value: &NodeMetadata) -> Self {
-        NodeEntry {
-            node_id: value.node_id.clone(),
-            meta: Option::None,
+            services: Vec::new(),
             timestamp: value.timestamp,
         }
     }

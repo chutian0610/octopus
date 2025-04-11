@@ -24,18 +24,9 @@ pub struct NodeMetadata {
     pub timestamp: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct NodeEntry {
-    #[prost(string, tag = "1")]
-    pub node_id: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "2")]
-    pub meta: ::core::option::Option<NodeMetadata>,
-    #[prost(uint64, tag = "3")]
-    pub timestamp: u64,
-}
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct NodeEntryList {
+pub struct NodeMetadataList {
     #[prost(message, repeated, tag = "1")]
-    pub entries: ::prost::alloc::vec::Vec<NodeEntry>,
+    pub entries: ::prost::alloc::vec::Vec<NodeMetadata>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]

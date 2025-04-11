@@ -2,7 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use anyhow::{Ok, Result};
 use octopus_rpc::{
-    common::{NodeEntry, NodeMetadata, ServiceMetadata},
+    common::{NodeMetadata, ServiceMetadata},
     extends::resolve_optional_node_entry,
 };
 use papaya::Operation;
@@ -64,16 +64,14 @@ impl ReplicatedState {
 impl DiscoveryState for ReplicatedState {
     async fn save(&self, metadata: &NodeMetadata) -> Result<()> {
         // save to local store
-        self.local
-            .save(NodeEntry::from_register_node_metadata(metadata))
-            .await;
+        self.local.save(metadata.clone()).await;
         Ok(())
     }
 
     async fn remove(&self, metadata: &NodeMetadata) -> Result<()> {
         // use empty value to mark the entry as tombstone
         self.local
-            .save(NodeEntry::from_unregister_node_metadata(metadata))
+            .save(NodeMetadata::to_unregister_node_metadata(metadata))
             .await;
         Ok(())
     }
@@ -88,8 +86,7 @@ impl DiscoveryState for ReplicatedState {
             .get_all()
             .await
             .into_iter()
-            .filter(|entry| entry.meta.is_some())
-            .map(|entry| entry.meta.unwrap())
+            .filter(|entry| !entry.services.is_empty())
             .flat_map(|metadata| metadata.services)
             .filter(|metadata| {
                 if service_id.is_some() && metadata.service_id != service_id.unwrap() {
@@ -118,27 +115,27 @@ struct Replicator {}
 /// Local store is used to store service metadata locally.
 #[async_trait]
 trait LocalDiscoveryStore: Send + Sync {
-    async fn get(&self, key: &str) -> Option<NodeEntry>;
-    async fn remove(&self, data: NodeEntry);
-    async fn save(&self, data: NodeEntry);
-    async fn get_all(&self) -> Vec<NodeEntry>;
+    async fn get(&self, key: &str) -> Option<NodeMetadata>;
+    async fn remove(&self, data: NodeMetadata);
+    async fn save(&self, data: NodeMetadata);
+    async fn get_all(&self) -> Vec<NodeMetadata>;
 }
 struct InMemoryStore {
     /// lock-free map.
-    map: papaya::HashMap<String, NodeEntry>,
+    map: papaya::HashMap<String, NodeMetadata>,
 }
 
 impl InMemoryStore {
     pub fn new() -> Self {
         Self {
-            map: papaya::HashMap::<String, NodeEntry>::new(),
+            map: papaya::HashMap::<String, NodeMetadata>::new(),
         }
     }
 }
 
 #[async_trait]
 impl LocalDiscoveryStore for InMemoryStore {
-    async fn get(&self, key: &str) -> Option<NodeEntry> {
+    async fn get(&self, key: &str) -> Option<NodeMetadata> {
         let map = self.map.pin();
         let result = map.get(key);
         match result {
@@ -146,15 +143,15 @@ impl LocalDiscoveryStore for InMemoryStore {
             None => None,
         }
     }
-    async fn remove(&self, data: NodeEntry) {
+    async fn remove(&self, data: NodeMetadata) {
         let map = self.map.pin();
         let _result = map.remove(&data.node_id);
     }
-    async fn save(&self, data: NodeEntry) {
+    async fn save(&self, data: NodeMetadata) {
         let map = self.map.pin();
         let mut flag = false;
         while !flag {
-            let old_entry: Option<&NodeEntry> = map.get(&data.node_id);
+            let old_entry: Option<&NodeMetadata> = map.get(&data.node_id);
             let new_entry = resolve_optional_node_entry(old_entry, &data);
             let compute = |entry| match entry {
                 // overwrite the value if old present and current is same as old .
@@ -175,7 +172,7 @@ impl LocalDiscoveryStore for InMemoryStore {
             }
         }
     }
-    async fn get_all(&self) -> Vec<NodeEntry> {
+    async fn get_all(&self) -> Vec<NodeMetadata> {
         let map = self.map.pin();
         let mut result = vec![];
         for (_, entry) in map.iter() {
@@ -189,6 +186,6 @@ impl LocalDiscoveryStore for InMemoryStore {
 /// remote store is used to sync service metadata.
 #[async_trait]
 trait RemoteDiscoveryStore: Send + Sync {
-    async fn save(&self, data: NodeEntry);
-    async fn get_all(&self) -> Vec<NodeEntry>;
+    async fn save(&self, data: NodeMetadata);
+    async fn get_all(&self) -> Vec<NodeMetadata>;
 }

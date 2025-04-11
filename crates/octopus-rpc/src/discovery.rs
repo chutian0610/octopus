@@ -301,7 +301,7 @@ pub mod remote_store_service_client {
         }
         pub async fn save(
             &mut self,
-            request: impl tonic::IntoRequest<super::super::common::NodeEntry>,
+            request: impl tonic::IntoRequest<super::super::common::NodeMetadata>,
         ) -> std::result::Result<
             tonic::Response<super::RemoteStoreSaveResp>,
             tonic::Status,
@@ -327,7 +327,7 @@ pub mod remote_store_service_client {
             &mut self,
             request: impl tonic::IntoRequest<()>,
         ) -> std::result::Result<
-            tonic::Response<super::super::common::NodeEntryList>,
+            tonic::Response<super::super::common::NodeMetadataList>,
             tonic::Status,
         > {
             self.inner
@@ -766,7 +766,7 @@ pub mod remote_store_service_server {
     pub trait RemoteStoreService: std::marker::Send + std::marker::Sync + 'static {
         async fn save(
             &self,
-            request: tonic::Request<super::super::common::NodeEntry>,
+            request: tonic::Request<super::super::common::NodeMetadata>,
         ) -> std::result::Result<
             tonic::Response<super::RemoteStoreSaveResp>,
             tonic::Status,
@@ -775,7 +775,7 @@ pub mod remote_store_service_server {
             &self,
             request: tonic::Request<()>,
         ) -> std::result::Result<
-            tonic::Response<super::super::common::NodeEntryList>,
+            tonic::Response<super::super::common::NodeMetadataList>,
             tonic::Status,
         >;
     }
@@ -860,7 +860,7 @@ pub mod remote_store_service_server {
                     struct SaveSvc<T: RemoteStoreService>(pub Arc<T>);
                     impl<
                         T: RemoteStoreService,
-                    > tonic::server::UnaryService<super::super::common::NodeEntry>
+                    > tonic::server::UnaryService<super::super::common::NodeMetadata>
                     for SaveSvc<T> {
                         type Response = super::RemoteStoreSaveResp;
                         type Future = BoxFuture<
@@ -869,7 +869,7 @@ pub mod remote_store_service_server {
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::super::common::NodeEntry>,
+                            request: tonic::Request<super::super::common::NodeMetadata>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
@@ -905,7 +905,7 @@ pub mod remote_store_service_server {
                     struct GetAllSvc<T: RemoteStoreService>(pub Arc<T>);
                     impl<T: RemoteStoreService> tonic::server::UnaryService<()>
                     for GetAllSvc<T> {
-                        type Response = super::super::common::NodeEntryList;
+                        type Response = super::super::common::NodeMetadataList;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,

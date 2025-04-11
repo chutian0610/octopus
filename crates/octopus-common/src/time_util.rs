@@ -45,14 +45,14 @@ pub fn format_local_time_with_pattern(st: SystemTime, pattern: &str) -> String {
 pub fn parse_local_time(datetime_str: &str, time_zone_str: &str) -> Result<SystemTime, String> {
     let tz: Tz = time_zone_str
         .parse()
-        .map_err(|e: ParseError| format!("解析时区字符串失败: {}", e))?;
+        .map_err(|e: ParseError| format!("parsing time zone string failed: {}", e))?;
     let naive_datetime = NaiveDateTime::parse_from_str(datetime_str, FORMAT_PATTERN_DATETIME)
-        .map_err(|e| format!("解析日期字符串失败: {}", e))?;
+        .map_err(|e| format!("parsing date string failed: {}", e))?;
     let local_datetime = Local
         .from_local_datetime(&naive_datetime)
         .single()
         .map(|time| time.with_timezone(&tz))
-        .ok_or_else(|| "无法转换为本地时间".to_string())?;
+        .ok_or_else(|| "cannot be converted to local time".to_string())?;
     Ok(local_datetime.into())
 }
 
@@ -63,14 +63,14 @@ pub fn parse_local_time_with_pattern(
 ) -> Result<SystemTime, String> {
     let tz: Tz = time_zone_str
         .parse()
-        .map_err(|e: ParseError| format!("解析时区字符串失败: {}", e))?;
+        .map_err(|e: ParseError| format!("parsing time zone string failed: {}", e))?;
     let naive_datetime = NaiveDateTime::parse_from_str(datetime_str, pattern)
-        .map_err(|e| format!("解析日期字符串失败: {}", e))?;
+        .map_err(|e| format!("parsing date string failed: {}", e))?;
     let local_datetime = Local
         .from_local_datetime(&naive_datetime)
         .single()
         .map(|time| time.with_timezone(&tz))
-        .ok_or_else(|| "无法转换为本地时间".to_string())?;
+        .ok_or_else(|| "cannot be converted to local time".to_string())?;
     Ok(local_datetime.into())
 }
 
@@ -86,7 +86,7 @@ pub fn format_utc_time_with_pattern(st: SystemTime, pattern: &str) -> String {
 pub fn parse_utc_time(datetime_str: &str) -> Result<SystemTime, String> {
     let utc_datetime = NaiveDateTime::parse_from_str(datetime_str, FORMAT_PATTERN_DATETIME)
         .map(|time: NaiveDateTime| time.and_utc())
-        .map_err(|e: chrono::ParseError| format!("解析日期字符串失败: {}", e))?;
+        .map_err(|e: chrono::ParseError| format!("parsing date string failed: {}", e))?;
     Ok(utc_datetime.into())
 }
 

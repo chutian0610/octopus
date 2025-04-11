@@ -43,8 +43,8 @@ service DiscoveryService {
 message RemoteStoreSaveResp {}
 
 service RemoteStoreService{
-  rpc Save(common.NodeEntry) returns (RemoteStoreSaveResp);
-  rpc GetAll(google.protobuf.Empty) returns (common.NodeEntryList);
+  rpc Save(common.NodeMetadata) returns (RemoteStoreSaveResp);
+  rpc GetAll(google.protobuf.Empty) returns (common.NodeMetadataList);
 }
 
 /* =============== Service Health Checker ================= */

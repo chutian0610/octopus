@@ -11,6 +11,7 @@ use octopus_rpc::{
 use tonic::{Request, Response, Status};
 
 pub struct DiscoveryServer {
+    /// The state of the discovery server.
     state: Arc<dyn DiscoveryState>,
 }
 

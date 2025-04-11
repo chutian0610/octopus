@@ -23,12 +23,6 @@ message NodeMetadata {
   uint64 timestamp = 3;
 }
 
-message NodeEntry{
-  string node_id = 1;
-  optional NodeMetadata meta = 2;
-  uint64 timestamp = 3;
-}
-
-message NodeEntryList{
-  repeated NodeEntry entries = 1;
+message NodeMetadataList{
+  repeated NodeMetadata entries = 1;
 }
