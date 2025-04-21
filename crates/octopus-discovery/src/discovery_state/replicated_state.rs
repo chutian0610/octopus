@@ -17,7 +17,7 @@ use super::DiscoveryState;
 ///        Sync  Remot         │    
 ///        │                   │    
 ///    ┌───▼──────┐     ┌──────┼───┐
-///    │   Local  │     │  Remote  │
+///    │  Local   │     │  Remotes │
 ///    └───▲──────┘     └──────▲───┘
 ///       sync               Async    
 ///        │  ┌─────────────┐  │    
@@ -41,8 +41,9 @@ struct ReplicatedState {
 
     /// replicator.
     replicator: Replicator,
+
     /// the replicated state config.
-    replicated_state_config: ReplicatedStateConfig,
+    replicated_state_config: Arc<ReplicatedStateConfig>,
 }
 
 impl ReplicatedState {
@@ -55,7 +56,7 @@ impl ReplicatedState {
         Self {
             local,
             replicator,
-            replicated_state_config,
+            replicated_state_config: Arc::new(replicated_state_config),
         }
     }
 }

@@ -16,6 +16,7 @@ message ServiceAnnounceReq{
   string service_id = 1;
   string host = 2;
   int32 port = 3;
+  map<string, string> metadata = 4;
 }
 
 message NodeAnnounceResp {}
@@ -28,6 +29,9 @@ message LookUpReq {
 message LookUpResp {
   repeated common.ServiceMetadata services = 1;
 }
+
+
+/* =============== Discovery Service ================= */
 
 service DiscoveryService {
   // Announce a node to the discovery server.
@@ -43,7 +47,11 @@ service DiscoveryService {
 message RemoteStoreSaveResp {}
 
 service RemoteStoreService{
+  // Save a node metadata to remote store.
   rpc Save(common.NodeMetadata) returns (RemoteStoreSaveResp);
+  // Batch save a list of node metadata to remote store.
+  rpc BatchSave(common.NodeMetadataList) returns (RemoteStoreSaveResp);
+  // Get all node metadata from remote store.
   rpc GetAll(google.protobuf.Empty) returns (common.NodeMetadataList);
 }
 

@@ -13,6 +13,11 @@ pub struct ServiceMetadata {
     pub port: i32,
     #[prost(uint64, tag = "6")]
     pub timestamp: u64,
+    #[prost(map = "string, string", tag = "7")]
+    pub metadata: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NodeMetadata {

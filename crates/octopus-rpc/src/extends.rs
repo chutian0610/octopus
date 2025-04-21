@@ -15,6 +15,7 @@ impl From<&NodeAnnounceReq> for NodeMetadata {
                 host: service.host.clone(),
                 port: service.port,
                 timestamp: req.timestamp,
+                metadata: service.metadata.clone(),
             })
             .collect();
         NodeMetadata {

@@ -15,6 +15,7 @@ message ServiceMetadata {
   string host = 4;
   int32 port = 5;
   uint64 timestamp = 6;
+  map<string, string> metadata = 7;
 }
 
 message NodeMetadata {
