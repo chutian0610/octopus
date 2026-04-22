@@ -97,25 +97,25 @@
 | SQL-03 | Phase 1 | Pending |
 | SQL-04 | Phase 1 | Pending |
 | SQL-05 | Phase 1 | Pending |
-| DIST-01 | Phase 1 | Pending |
-| DIST-02 | Phase 1 | Pending |
-| DIST-03 | Phase 1 | Pending |
-| DIST-04 | Phase 1 | Pending |
-| DIST-05 | Phase 1 | Pending |
+| DIST-01 | Phase 2 | Pending |
+| DIST-02 | Phase 2 | Pending |
+| DIST-03 | Phase 3 | Pending |
+| DIST-04 | Phase 3 | Pending |
+| DIST-05 | Phase 3 | Pending |
 | DATA-01 | Phase 1 | Pending |
 | DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 2 | Pending |
-| DATA-04 | Phase 2 | Pending |
-| DATA-05 | Phase 2 | Pending |
-| ADV-01 | Phase 2 | Pending |
-| ADV-02 | Phase 2 | Pending |
-| ADV-03 | Phase 2 | Pending |
-| ADV-04 | Phase 3 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 4 | Pending |
+| DATA-05 | Phase 4 | Pending |
+| ADV-01 | Phase 4 | Pending |
+| ADV-02 | Phase 4 | Pending |
+| ADV-03 | Phase 4 | Pending |
+| ADV-04 | Phase 5 | Pending |
 | OBS-01 | Phase 2 | Pending |
 | OBS-02 | Phase 3 | Pending |
 | OBS-03 | Phase 1 | Pending |
-| CLI-01 | Phase 1 | Pending |
-| CLI-02 | Phase 2 | Pending |
+| CLI-01 | Phase 2 | Pending |
+| CLI-02 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 24 total
