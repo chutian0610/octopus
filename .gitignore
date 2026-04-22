@@ -1,0 +1,10 @@
+# MACOS
+.DS_Store
+
+# RUST
+target/
+
+external/
+
+# Worktrees
+.worktrees/
