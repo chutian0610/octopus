@@ -30,7 +30,11 @@ Octopus is a distributed MPP query engine built on Apache DataFusion, targeting 
   7. User can query CSV/TSV files on S3/HDFS/local filesystem
   8. User can query JSON files on S3/HDFS/local filesystem
   9. System provides structured logging with query tracing
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Workspace foundation + DataFusion session
+- [ ] 01-02-PLAN.md — SQL execution (SELECT, aggregation, JOIN, CTE)
+- [ ] 01-03-PLAN.md — File formats (Parquet/CSV/JSON) + structured logging
 
 ### Phase 2: Coordinator Core
 **Goal**: Coordinator parses SQL and creates distributed query plan; users can submit queries via CLI
@@ -80,7 +84,7 @@ Octopus is a distributed MPP query engine built on Apache DataFusion, targeting 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Single-Node Foundation | 0/9 | Not started | - |
+| 1. Single-Node Foundation | 0/3 | Planned | - |
 | 2. Coordinator Core | 0/4 | Not started | - |
 | 3. Workers + Arrow Flight | 0/4 | Not started | - |
 | 4. Advanced SQL & Federated Sources | 0/5 | Not started | - |
