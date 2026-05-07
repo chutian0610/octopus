@@ -1,0 +1,9 @@
+[package]
+name = "octopus-worker"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+octopus-common = { path = "../octopus-common" }
