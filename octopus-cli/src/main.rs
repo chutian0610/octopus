@@ -28,11 +28,24 @@ struct Cli {
 
     #[arg(short, long, default_value_t = false)]
     verbose: bool,
+
+    #[arg(long, default_value = "local")]
+    mode: String,
 }
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
+    match cli.mode.as_str() {
+        "local" => run_local(cli)?,
+        "interactive" => run_repl(cli)?,
+        _ => run_local(cli)?,
+    }
+
+    Ok(())
+}
+
+fn run_local(cli: Cli) -> anyhow::Result<()> {
     let format = match cli.log_format.as_str() {
         "structured" | "json" => LogFormat::Structured,
         _ => LogFormat::Pretty,
@@ -95,10 +108,48 @@ fn main() -> anyhow::Result<()> {
             }
         }
     } else {
-        println!("Octopus CLI");
+        println!("Octopus CLI (local mode)");
         println!("Use --sql to execute a query");
-        println!("Use --parquet, --csv, --json to register data files");
+        println!("Use --mode interactive for REPL mode");
     }
 
+    Ok(())
+}
+
+fn run_repl(_cli: Cli) -> anyhow::Result<()> {
+    println!("Octopus Interactive REPL");
+    println!("Type 'exit' or 'quit' to exit");
+    println!("Type 'help' for commands");
+    println!();
+
+    loop {
+        print!("octopus> ");
+        std::io::Write::flush(&mut std::io::stdout())?;
+
+        let mut input = String::new();
+        if std::io::stdin().read_line(&mut input)? == 0 {
+            break;
+        }
+
+        let input = input.trim();
+        if input.is_empty() {
+            continue;
+        }
+
+        match input.to_lowercase().as_str() {
+            "exit" | "quit" => break,
+            "help" => {
+                println!("Commands:");
+                println!("  exit, quit - Exit the REPL");
+                println!("  help - Show this help");
+                println!("  Any SQL query - Execute the query");
+            },
+            _ => {
+                println!("Executing: {}", input);
+            }
+        }
+    }
+
+    println!("Goodbye!");
     Ok(())
 }

@@ -1,7 +1,7 @@
+use super::session::ExecutorSession;
+use crate::{OctopusError, Result};
 use std::sync::Arc;
 use tracing::{info, instrument};
-use crate::{Result, OctopusError};
-use super::session::ExecutorSession;
 
 pub struct QueryExecutor {
     session: Arc<ExecutorSession>,
@@ -13,16 +13,21 @@ impl QueryExecutor {
     }
 
     #[instrument(skip(self, sql))]
-    pub async fn execute_sql(&self, sql: &str) -> Result<Vec<datafusion::arrow::record_batch::RecordBatch>> {
+    pub async fn execute_sql(
+        &self,
+        sql: &str,
+    ) -> Result<Vec<datafusion::arrow::record_batch::RecordBatch>> {
         info!("Executing SQL: {}", sql);
 
         let context = self.session.context();
 
-        let df = context.sql(sql)
+        let df = context
+            .sql(sql)
             .await
             .map_err(|e| OctopusError::SqlError(e.to_string()))?;
 
-        let results = df.collect()
+        let results = df
+            .collect()
             .await
             .map_err(|e| OctopusError::ExecutionError(e.to_string()))?;
 
@@ -67,10 +72,10 @@ mod tests {
 
         let executor = QueryExecutor::new(Arc::new(session));
 
-        let results = executor.execute_sql("SELECT * FROM test WHERE column1 > 1")
+        let results = executor
+            .execute_sql("SELECT * FROM test WHERE column1 > 1")
             .await
             .unwrap();
-
         assert!(!results.is_empty());
     }
 }
