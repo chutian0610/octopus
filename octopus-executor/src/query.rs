@@ -60,14 +60,14 @@ mod tests {
     #[tokio::test]
     async fn test_simple_select() {
         let session = ExecutorSession::new().unwrap();
-        let executor = QueryExecutor::new(Arc::new(session));
-
         let ctx = session.context();
         ctx.sql("CREATE TABLE test AS VALUES (1, 'a'), (2, 'b'), (3, 'c')")
             .await
             .unwrap();
 
-        let results = executor.execute_sql("SELECT * FROM test WHERE column_1 > 1")
+        let executor = QueryExecutor::new(Arc::new(session));
+
+        let results = executor.execute_sql("SELECT * FROM test WHERE column1 > 1")
             .await
             .unwrap();
 
