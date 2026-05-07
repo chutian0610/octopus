@@ -8,7 +8,7 @@ Octopus is a distributed MPP query engine built on Apache DataFusion, targeting 
 
 ## Phases
 
-- [ ] **Phase 1: Single-Node Foundation** - Local SQL execution on Parquet/CSV/JSON with DataFusion
+- [x] **Phase 1: Single-Node Foundation** - Local SQL execution on Parquet/CSV/JSON with DataFusion
 - [ ] **Phase 2: Coordinator Core** - Distributed query planning, gRPC control plane, CLI interface
 - [ ] **Phase 3: Workers + Arrow Flight** - Parallel task execution, Exchange operators, data transfer
 - [ ] **Phase 4: Advanced SQL & Federated Sources** - Window functions, PostgreSQL/MySQL connectors
@@ -32,9 +32,9 @@ Octopus is a distributed MPP query engine built on Apache DataFusion, targeting 
   9. System provides structured logging with query tracing
 **Plans**: 3 plans
 Plans:
-- [ ] 01-01-PLAN.md — Workspace foundation + DataFusion session
-- [ ] 01-02-PLAN.md — SQL execution (SELECT, aggregation, JOIN, CTE)
-- [ ] 01-03-PLAN.md — File formats (Parquet/CSV/JSON) + structured logging
+- [x] 01-01-PLAN.md — Workspace foundation + DataFusion session
+- [x] 01-02-PLAN.md — SQL execution (SELECT, aggregation, JOIN, CTE)
+- [x] 01-03-PLAN.md — File formats (Parquet/CSV/JSON) + structured logging
 
 ### Phase 2: Coordinator Core
 **Goal**: Coordinator parses SQL and creates distributed query plan; users can submit queries via CLI
@@ -84,7 +84,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Single-Node Foundation | 0/3 | Planned | - |
+| 1. Single-Node Foundation | 3/3 | Complete | 2026-05-07 |
 | 2. Coordinator Core | 0/4 | Not started | - |
 | 3. Workers + Arrow Flight | 0/4 | Not started | - |
 | 4. Advanced SQL & Federated Sources | 0/5 | Not started | - |
