@@ -62,9 +62,16 @@ Plans:
   4. System emits metrics (CPU, memory, rows processed per stage)
 **Plans**: 4 plans
 Plans:
-- [ ] 03-01-PLAN.md — Worker service foundation with CPU/IO runtime separation
+**Wave 1**
+- [x] 03-01-PLAN.md — Worker service foundation with CPU/IO runtime separation
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 03-02-PLAN.md — Arrow Flight data plane with worker-pull model
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 03-03-PLAN.md — Exchange operators with pipeline streaming and backpressure
+
+**Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 03-04-PLAN.md — Task retry mechanism and metrics collection
 
 ### Phase 4: Advanced SQL & Federated Sources
@@ -95,7 +102,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Single-Node Foundation | 3/3 | Complete | 2026-05-07 |
 | 2. Coordinator Core | 3/3 | Complete | - |
-| 3. Workers + Arrow Flight | 0/4 | In progress | - |
+| 3. Workers + Arrow Flight | 1/4 | In progress | - |
 | 4. Advanced SQL & Federated Sources | 0/5 | Not started | - |
 | 5. Observability & Clients | 0/3 | Not started | - |
 
