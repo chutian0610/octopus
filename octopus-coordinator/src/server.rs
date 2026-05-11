@@ -35,4 +35,8 @@ impl CoordinatorServer {
     pub async fn get_query_state(&self, query_id: &str) -> Option<QueryState> {
         self.query_service.get_query_state(query_id).await
     }
+
+    pub async fn explain_query(&self, sql: &str) -> Result<String, String> {
+        self.query_service.explain_query(sql).await
+    }
 }

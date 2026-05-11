@@ -115,4 +115,40 @@ impl QueryService {
     pub async fn get_query_state(&self, query_id: &str) -> Option<QueryState> {
         self.queries.read().await.get(query_id).map(|q| q.state.clone())
     }
+
+    /// Parse SQL and return a formatted query plan for EXPLAIN command
+    pub async fn explain_query(&self, sql: &str) -> Result<String, String> {
+        // Parse SQL using DataFusion
+        let df = self.context
+            .sql(sql)
+            .await
+            .map_err(|e| format!("SQL parse error: {}", e))?;
+
+        let logical_plan = df.logical_plan();
+
+        // Format the logical plan using display
+        let plan_str = format!("{}", logical_plan.display());
+
+        // Create a structured explanation
+        let explanation = format!(
+            "Distributed Query Plan\n\
+             ======================\n\
+             \n\
+             SQL: {}\n\
+             \n\
+             Logical Plan:\n\
+             {}\n\
+             \n\
+             Stage DAG:\n\
+             - Stage 0: Single-stage execution (partition_count=1)\n\
+             \n\
+             Note: Multi-stage distributed execution will be implemented\n\
+             when exchange boundaries are analyzed in future iterations.",
+            sql,
+            plan_str
+        );
+
+        info!("Generated EXPLAIN plan for query: {}", sql);
+        Ok(explanation)
+    }
 }
