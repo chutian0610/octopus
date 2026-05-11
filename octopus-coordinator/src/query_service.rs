@@ -5,6 +5,7 @@ use tracing::info;
 use datafusion::execution::context::SessionContext;
 use datafusion_expr::LogicalPlan;
 use crate::scheduler::QueryScheduler;
+use crate::stage_planner::{StagePlanner, Stage, is_pipeline_breaker};
 
 #[derive(Debug, Clone)]
 pub struct Query {

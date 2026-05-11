@@ -17,6 +17,13 @@ thiserror = { workspace = true }
 anyhow = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+arrow = { workspace = true }
+arrow-flight = { workspace = true }
+arrow-ipc = { workspace = true }
+async-stream = "0.3"
+futures = { workspace = true }
+tonic = "0.12"
+bytes = "1"
 
 [dev-dependencies]
 tokio-test = "0.4"

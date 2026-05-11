@@ -2,6 +2,8 @@ pub mod session;
 pub mod query;
 pub mod datasource;
 pub mod logging;
+pub mod exchange_receiver;
+pub mod exchange_sender;
 
 pub use session::ExecutorSession;
 pub use query::QueryExecutor;
