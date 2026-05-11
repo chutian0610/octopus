@@ -25,10 +25,10 @@ impl CoordinatorServer {
 
     pub async fn create_task(&self, query_id: &str, stage: u32, partition: u32) -> Task {
         let scheduler = self.scheduler.read().await;
-        scheduler.create_task(query_id, stage, partition).await
+        scheduler.create_task(query_id, stage, partition, Vec::new()).await
     }
 
-    pub async fn submit_query(&self, sql: &str) -> String {
+    pub async fn submit_query(&self, sql: &str) -> Result<String, String> {
         self.query_service.submit_query(sql).await
     }
 
