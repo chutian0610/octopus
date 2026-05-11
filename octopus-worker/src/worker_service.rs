@@ -4,10 +4,11 @@
 //! Tasks are received via gRPC and executed on the CPU thread pool.
 
 use std::sync::Arc;
-use tokio::sync::mpsc;
 use uuid::Uuid;
 use crate::runtime::WorkerRuntime;
 use crate::task_processor::TaskProcessor;
+use crate::flight_server::FlightServer;
+use crate::flight_handler::FlightHandler;
 use octopus_common::{Result, OctopusError};
 
 /// Worker service handle for task execution.
@@ -15,16 +16,24 @@ pub struct WorkerService {
     worker_id: String,
     runtime: Arc<WorkerRuntime>,
     processor: Arc<TaskProcessor>,
+    flight_server: Arc<FlightServer>,
     coordinator_url: String,
 }
 
 impl WorkerService {
-    /// Create a new worker service.
-    pub fn new(coordinator_url: String) -> Result<Self> {
+    /// Create a new worker service with Flight server.
+    pub fn new(coordinator_url: String, flight_port: u16) -> Result<Self> {
         let runtime = Arc::new(WorkerRuntime::new()?);
         let processor = Arc::new(TaskProcessor::new(runtime.cpu.clone())?);
+        let handler = Arc::new(FlightHandler::new(processor.clone()));
 
         let worker_id = Uuid::new_v4().to_string();
+        let flight_server = Arc::new(FlightServer::new(
+            worker_id.clone(),
+            flight_port,
+            runtime.io.clone(),
+            handler,
+        ));
 
         tracing::info!("WorkerService created with ID: {}", worker_id);
 
@@ -32,6 +41,7 @@ impl WorkerService {
             worker_id,
             runtime,
             processor,
+            flight_server,
             coordinator_url,
         })
     }
@@ -44,12 +54,17 @@ impl WorkerService {
     /// Start the worker's task receiver loop.
     /// This runs on the IO runtime and receives tasks from the coordinator.
     pub async fn run(&self) -> Result<()> {
-        tracing::info!("Worker {} starting task receiver loop", self.worker_id);
+        tracing::info!("Worker {} starting", self.worker_id);
+
+        // Start Arrow Flight server
+        let flight_addr = self.flight_server.start().await
+            .map_err(|e| OctopusError::ExecutionError(format!("Flight server error: {}", e)))?;
+        tracing::info!("Arrow Flight server started on {}", flight_addr);
 
         // Connect to coordinator for task registration
         self.register_with_coordinator().await?;
 
-        // Task receiver loop (simplified - actual implementation will use gRPC)
+        // Task receiver loop
         self.task_receiver_loop().await;
 
         Ok(())
@@ -86,7 +101,7 @@ impl WorkerService {
     }
 
     /// Process a single task (used by task receiver).
-    async fn process_task(&self, task_id: String, plan_json: String) -> Result<String> {
+    async fn process_task(&self, task_id: String, _plan_json: String) -> Result<String> {
         tracing::info!("Processing task {} on worker {}", task_id, self.worker_id);
 
         // TODO: Deserialize physical plan from JSON
@@ -100,18 +115,17 @@ impl WorkerService {
     }
 
     /// Execute a task synchronously on the CPU thread pool.
-    pub fn execute_task_sync(&self, task_id: String, plan_json: String) -> Result<String> {
-        let processor = self.processor.clone();
-
+    pub fn execute_task_sync(&self, task_id: String, _plan_json: String) -> Result<String> {
         // Use spawn_blocking on the CPU runtime for synchronous execution
-        // Get the runtime handle and spawn a blocking task
-        let cpu = self.runtime.cpu.as_ref();
-        let handle = cpu.handle().spawn_blocking(move || {
+        let runtime = self.runtime.cpu.as_ref();
+        let worker_id = self.worker_id.clone();
+        let handle = runtime.handle().spawn_blocking(move || {
             // Placeholder - actual implementation would deserialize plan and execute
             tracing::info!("Executing task {} synchronously", task_id);
             Ok(serde_json::json!({
                 "task_id": task_id,
                 "status": "completed",
+                "worker_id": worker_id,
             }).to_string())
         });
 
@@ -122,14 +136,4 @@ impl WorkerService {
         }).map_err(|e|
             OctopusError::ExecutionError(format!("Task execution failed: {}", e)))?
     }
-}
-
-/// Task message received from coordinator.
-#[derive(Debug, Clone)]
-pub struct TaskMessage {
-    pub task_id: String,
-    pub query_id: String,
-    pub stage: u32,
-    pub partition: u32,
-    pub plan_data: Vec<u8>,  // Serialized physical plan
 }

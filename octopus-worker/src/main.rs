@@ -6,7 +6,7 @@
 
 use clap::Parser;
 use tracing_subscriber::EnvFilter;
-use octopus_worker::{WorkerService, WorkerRuntime};
+use octopus_worker::WorkerService;
 
 #[derive(Parser, Debug)]
 #[command(name = "octopus-worker")]
@@ -40,22 +40,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("Coordinator: {}", args.coordinator);
     tracing::info!("Flight port: {}", args.port);
 
-    // Create worker runtime with CPU and IO separation
-    let runtime = WorkerRuntime::new()?;
-    tracing::info!("Worker runtime initialized");
-
-    // Create and run worker service
-    let service = WorkerService::new(args.coordinator.clone())?;
+    // Create worker service with Flight server
+    let service = WorkerService::new(args.coordinator.clone(), args.port)?;
 
     tracing::info!("Worker {} starting", service.worker_id());
     tracing::info!("Press Ctrl+C to shutdown");
 
-    // Run the worker service
-    // Note: In this initial version, we just initialize the runtime
-    // The actual task receiving via gRPC and Arrow Flight server will be in subsequent plans
+    // Run the worker service with Flight server
+    service.run().await?;
 
-    // For now, just keep the worker running
-    loop {
-        tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
-    }
+    Ok(())
 }
