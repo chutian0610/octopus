@@ -77,7 +77,7 @@ impl CoordinatorClient {
     }
 
     fn get_query_state(&self, query_id: &str) -> anyhow::Result<String> {
-        let url = format!("{}/query/{}", self.base_url, query_id);
+        let url = format!("{}/query/state/{}", self.base_url, query_id);
         let client = reqwest::blocking::Client::new();
         let resp = client
             .get(&url)
