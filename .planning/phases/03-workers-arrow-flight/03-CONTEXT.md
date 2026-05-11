@@ -29,6 +29,8 @@ Workers execute distributed tasks in parallel and exchange data via Arrow Flight
 
 **Rationale:** Compute-intensive query execution benefits from thread pool isolation — it prevents blocking tasks from starving the async runtime. Thread pool size should match the number of CPU cores for optimal parallelism.
 
+**Connection to runtime separation:** Since CPU and IO runtimes are separate, compute tasks (physical plan execution) run on the dedicated thread pool while IO tasks (Arrow Flight network, S3 reads) run on the IO runtime. This avoids Tokio runtime contention — the CPU pool handles compute without being blocked by async network I/O.
+
 ### Exchange Operator Pattern — Streaming with Backpressure
 **Decision:** Exchange operators use streaming with backpressure — data is produced and consumed concurrently without stage materialization.
 
