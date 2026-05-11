@@ -102,7 +102,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Single-Node Foundation | 3/3 | Complete | 2026-05-07 |
 | 2. Coordinator Core | 3/3 | Complete | - |
-| 3. Workers + Arrow Flight | 1/4 | In progress | - |
+| 3. Workers + Arrow Flight | 4/4 | Complete | 2026-05-11 |
 | 4. Advanced SQL & Federated Sources | 0/5 | Not started | - |
 | 5. Observability & Clients | 0/3 | Not started | - |
 
