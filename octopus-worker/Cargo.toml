@@ -32,9 +32,12 @@ clap = { workspace = true }
 # Futures for async stream handling
 futures = "0.3"
 
-# Arrow Flight - deferred to 03-02 (compatibility issue with arrow 53)
-# arrow-flight = "53"
-# arrow = "53"
+# Arrow Flight - worker data plane (worker-pull model)
+arrow-flight = "53"
+arrow = "53"
+arrow-schema = "53"
+arrow-array = "53"
+
 tonic = { workspace = true }
 prost = { workspace = true }
 

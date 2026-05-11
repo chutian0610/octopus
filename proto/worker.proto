@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package octopus.worker.v1;
+
+import "google/protobuf/any.proto";
+
+/// Worker service for task execution and data exchange.
+/// Follows worker-pull model where workers expose Flight servers.
+service WorkerFlightService {
+  /// Execute a task and return results via Flight stream
+  rpc ExecuteTask(ExecuteTaskRequest) returns (ExecuteTaskResponse);
+
+  /// Get data for an exchange partition
+  rpc GetExchangeData(google.protobuf.Any) returns (stream FlightData);
+
+  /// Worker health check
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message ExecuteTaskRequest {
+  string task_id = 1;
+  string query_id = 2;
+  uint32 stage = 3;
+  uint32 partition = 4;
+  bytes physical_plan = 5;  // Serialized DataFusion physical plan
+}
+
+message ExecuteTaskResponse {
+  string task_id = 1;
+  bool success = 2;
+  string error_message = 3;
+  string flight_endpoint = 4;  // Endpoint to fetch results via Arrow Flight
+}
+
+message FlightData {
+  bytes data_body = 1;
+  bytes app_metadata = 2;
+  FlightDescriptor descriptor = 3;
+  bytes json_footer = 4;
+}
+
+message FlightDescriptor {
+  FlightDescriptorType r#type = 1;
+  bytes cmd = 2;
+  repeated string pathname = 3;
+}
+
+enum FlightDescriptorType {
+  UNKNOWN = 0;
+  CMD = 1;
+  PATH = 2;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string worker_id = 1;
+  bool healthy = 2;
+  uint32 active_tasks = 3;
+}
