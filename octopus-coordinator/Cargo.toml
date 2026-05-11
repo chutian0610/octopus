@@ -9,7 +9,7 @@ license.workspace = true
 octopus-common = { path = "../octopus-common" }
 tonic = { workspace = true }
 prost = { workspace = true }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 clap = { workspace = true }
@@ -17,3 +17,8 @@ uuid = { workspace = true }
 datafusion = { workspace = true }
 datafusion-expr = { workspace = true }
 datafusion-common = { workspace = true }
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
