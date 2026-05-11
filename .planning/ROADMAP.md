@@ -45,7 +45,11 @@ Plans:
   2. Coordinator can assign tasks to workers based on data locality
   3. User can use CLI to execute SQL queries interactively or in batch mode
   4. User can execute EXPLAIN to see distributed query plan
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [x] 02-01-PLAN.md — Coordinator core with worker registry, query scheduler, CLI modes
+- [ ] 02-02-PLAN.md — DataFusion SQL parsing and data locality scheduling (gap closure)
+- [ ] 02-03-PLAN.md — REPL execution, batch mode, and EXPLAIN command (gap closure)
 
 ### Phase 3: Workers + Arrow Flight
 **Goal**: Workers execute tasks in parallel and exchange data via Arrow Flight with pipeline execution
@@ -85,7 +89,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Single-Node Foundation | 3/3 | Complete | 2026-05-07 |
-| 2. Coordinator Core | 0/4 | Not started | - |
+| 2. Coordinator Core | 2/5 | In progress | - |
 | 3. Workers + Arrow Flight | 0/4 | Not started | - |
 | 4. Advanced SQL & Federated Sources | 0/5 | Not started | - |
 | 5. Observability & Clients | 0/3 | Not started | - |
