@@ -12,6 +12,8 @@ license = "Apache-2.0"
 datafusion = "43"
 datafusion-expr = "43"
 datafusion-common = "43"
+datafusion-execution = "43"
+datafusion-physical-plan = "43"
 
 tokio = { version = "1.52", features = ["rt-multi-thread", "macros", "sync"] }
 async-trait = "0.1"
@@ -35,3 +37,9 @@ tonic-build = "0.14"
 uuid = { version = "1", features = ["v4"] }
 reqwest = "0.12"
 url = "2"
+
+arrow = "53"
+arrow-flight = "53"
+arrow-ipc = "53"
+futures = "0.3"
+async-stream = "0.3"
