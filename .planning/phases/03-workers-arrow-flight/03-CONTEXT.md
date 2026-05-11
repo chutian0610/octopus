@@ -24,10 +24,10 @@ Workers execute distributed tasks in parallel and exchange data via Arrow Flight
 
 **Rationale:** Follows Trino-style pull model where data flows based on consumer demand, enabling natural backpressure. The coordinator orchestrates but is not in the data path.
 
-### Task Execution Model — DataFusion Task Registry
-**Decision:** Use DataFusion's built-in task registry for managing task execution on workers.
+### Task Execution Model — Dedicated Thread Pool
+**Decision:** Use a dedicated thread pool for DataFusion task execution on workers.
 
-**Rationale:** DataFusion 43 has a task registry system that coordinates execution across partitions. Using it avoids reinventing task lifecycle management.
+**Rationale:** Compute-intensive query execution benefits from thread pool isolation — it prevents blocking tasks from starving the async runtime. Thread pool size should match the number of CPU cores for optimal parallelism.
 
 ### Exchange Operator Pattern — Streaming with Backpressure
 **Decision:** Exchange operators use streaming with backpressure — data is produced and consumed concurrently without stage materialization.
