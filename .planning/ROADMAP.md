@@ -48,8 +48,8 @@ Plans:
 **Plans**: 5 plans
 Plans:
 - [x] 02-01-PLAN.md — Coordinator core with worker registry, query scheduler, CLI modes
-- [ ] 02-02-PLAN.md — DataFusion SQL parsing and data locality scheduling (gap closure)
-- [ ] 02-03-PLAN.md — REPL execution, batch mode, and EXPLAIN command (gap closure)
+- [x] 02-02-PLAN.md — DataFusion SQL parsing and data locality scheduling (gap closure)
+- [x] 02-03-PLAN.md — REPL execution, batch mode, and EXPLAIN command (gap closure)
 
 ### Phase 3: Workers + Arrow Flight
 **Goal**: Workers execute tasks in parallel and exchange data via Arrow Flight with pipeline execution
