@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 use tracing::info;
-use super::worker_registry::WorkerRegistry;
+use super::worker_registry::{WorkerRegistry, WorkerInfo};
 
 #[derive(Debug, Clone)]
 pub struct Task {
@@ -12,6 +12,7 @@ pub struct Task {
     pub stage: u32,
     pub partition: u32,
     pub assigned_worker: Option<String>,
+    pub required_partitions: Vec<String>,
 }
 
 pub struct QueryScheduler {
@@ -29,7 +30,7 @@ impl QueryScheduler {
         }
     }
 
-    pub async fn create_task(&self, query_id: &str, stage: u32, partition: u32) -> Task {
+    pub async fn create_task(&self, query_id: &str, stage: u32, partition: u32, required_partitions: Vec<String>) -> Task {
         let task_id = Uuid::new_v4().to_string();
         let task = Task {
             task_id: task_id.clone(),
@@ -37,6 +38,7 @@ impl QueryScheduler {
             stage,
             partition,
             assigned_worker: None,
+            required_partitions,
         };
         self.pending_tasks.write().await.insert(task_id, task.clone());
         info!("Created task {} for query {} stage {} partition {}",
@@ -53,17 +55,52 @@ impl QueryScheduler {
             return None;
         }
 
-        let idx = *self.task_counter.read().await as usize % workers.len();
-        let worker = workers.get(idx)?;
-        task.assigned_worker = Some(worker.worker_id.clone());
+        // If task has partition requirements, score workers by locality
+        let best_worker = if task.required_partitions.is_empty() {
+            // Fall back to round-robin when no locality info
+            let idx = *self.task_counter.read().await as usize % workers.len();
+            workers.get(idx).cloned()
+        } else {
+            // Find worker with most locality (most matching partitions)
+            self.find_best_worker(&workers, &task.required_partitions).await
+        };
 
-        {
-            let mut counter = self.task_counter.write().await;
-            *counter += 1;
+        if let Some(worker) = best_worker {
+            task.assigned_worker = Some(worker.worker_id.clone());
+
+            if task.required_partitions.is_empty() {
+                let mut counter = self.task_counter.write().await;
+                *counter += 1;
+            }
+
+            info!("Assigned task {} to worker {} (locality-aware)",
+                  task_id, worker.worker_id);
+            Some(worker.worker_id.clone())
+        } else {
+            None
+        }
+    }
+
+    async fn find_best_worker(
+        &self,
+        workers: &[WorkerInfo],
+        required_partitions: &[String],
+    ) -> Option<WorkerInfo> {
+        let mut best_worker: Option<WorkerInfo> = None;
+        let mut best_score: usize = 0;
+
+        for worker in workers {
+            let score = worker.partitions.iter()
+                .filter(|p| required_partitions.contains(&p.partition_id))
+                .count();
+
+            if score > best_score {
+                best_score = score;
+                best_worker = Some(worker.clone());
+            }
         }
 
-        info!("Assigned task {} to worker {}", task_id, worker.worker_id);
-        Some(worker.worker_id.clone())
+        best_worker
     }
 
     pub async fn complete_task(&self, task_id: &str) {

@@ -5,6 +5,13 @@ use uuid::Uuid;
 use tracing::info;
 
 #[derive(Debug, Clone)]
+pub struct PartitionInfo {
+    pub partition_id: String,
+    pub table_name: String,
+    pub file_path: String,
+}
+
+#[derive(Debug, Clone)]
 pub struct WorkerInfo {
     pub worker_id: String,
     pub host: String,
@@ -12,6 +19,7 @@ pub struct WorkerInfo {
     pub slots: u32,
     pub registered_at: std::time::Instant,
     pub last_heartbeat: std::time::Instant,
+    pub partitions: Vec<PartitionInfo>,
 }
 
 pub struct WorkerRegistry {
@@ -40,6 +48,7 @@ impl WorkerRegistry {
             slots,
             registered_at: std::time::Instant::now(),
             last_heartbeat: std::time::Instant::now(),
+            partitions: Vec::new(),
         };
         self.workers.write().await.insert(worker_id.clone(), info);
         info!("Worker registered: {} at {}:{}", worker_id, host, port);
@@ -61,6 +70,15 @@ impl WorkerRegistry {
     pub async fn update_heartbeat(&self, worker_id: &str) -> bool {
         if let Some(info) = self.workers.write().await.get_mut(worker_id) {
             info.last_heartbeat = std::time::Instant::now();
+            true
+        } else {
+            false
+        }
+    }
+
+    pub async fn register_partition(&self, worker_id: &str, partition: PartitionInfo) -> bool {
+        if let Some(info) = self.workers.write().await.get_mut(worker_id) {
+            info.partitions.push(partition);
             true
         } else {
             false
