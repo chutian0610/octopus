@@ -60,7 +60,12 @@ Plans:
   2. Exchange operators can pipeline data without stage materialization
   3. System supports task-level retry on failure (configurable)
   4. System emits metrics (CPU, memory, rows processed per stage)
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 03-01-PLAN.md — Worker service foundation with CPU/IO runtime separation
+- [ ] 03-02-PLAN.md — Arrow Flight data plane with worker-pull model
+- [ ] 03-03-PLAN.md — Exchange operators with pipeline streaming and backpressure
+- [ ] 03-04-PLAN.md — Task retry mechanism and metrics collection
 
 ### Phase 4: Advanced SQL & Federated Sources
 **Goal**: Users can query PostgreSQL/MySQL and use window functions and advanced SQL features
@@ -89,8 +94,8 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Single-Node Foundation | 3/3 | Complete | 2026-05-07 |
-| 2. Coordinator Core | 2/5 | In progress | - |
-| 3. Workers + Arrow Flight | 0/4 | Not started | - |
+| 2. Coordinator Core | 3/3 | Complete | - |
+| 3. Workers + Arrow Flight | 0/4 | In progress | - |
 | 4. Advanced SQL & Federated Sources | 0/5 | Not started | - |
 | 5. Observability & Clients | 0/3 | Not started | - |
 
