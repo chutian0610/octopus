@@ -33,13 +33,14 @@ clap = { workspace = true }
 futures = "0.3"
 
 # Arrow Flight - worker data plane (worker-pull model)
+# Force tonic 0.12 for arrow-flight 53 compatibility
 arrow-flight = "53"
 arrow = "53"
 arrow-schema = "53"
 arrow-array = "53"
-
-tonic = { workspace = true }
-prost = { workspace = true }
+arrow-ipc = "53"
+tonic = "0.12"
+prost = "0.13"
 
 [dev-dependencies]
 tokio-test = "0.4"

@@ -9,6 +9,9 @@ use crate::runtime::WorkerRuntime;
 use crate::task_processor::TaskProcessor;
 use crate::flight_server::FlightServer;
 use crate::flight_handler::FlightHandler;
+use crate::retry_handler::RetryHandler;
+use crate::retry_handler::RetryConfig;
+use crate::metrics::MetricsCollector;
 use octopus_common::{Result, OctopusError};
 
 /// Worker service handle for task execution.
@@ -18,16 +21,32 @@ pub struct WorkerService {
     processor: Arc<TaskProcessor>,
     flight_server: Arc<FlightServer>,
     coordinator_url: String,
+    metrics: Arc<MetricsCollector>,
+    retry_config: RetryConfig,
 }
 
 impl WorkerService {
     /// Create a new worker service with Flight server.
     pub fn new(coordinator_url: String, flight_port: u16) -> Result<Self> {
         let runtime = Arc::new(WorkerRuntime::new()?);
-        let processor = Arc::new(TaskProcessor::new(runtime.cpu.clone())?);
+
+        // Create worker ID
+        let worker_id = Uuid::new_v4().to_string();
+
+        // Create metrics collector
+        let metrics = Arc::new(MetricsCollector::new(worker_id.clone()));
+
+        // Create processor with retry support
+        let retry_config = RetryConfig::default();
+        let processor = Arc::new(TaskProcessor::with_retry(
+            runtime.cpu.clone(),
+            retry_config.clone(),
+            metrics.clone(),
+            worker_id.clone(),
+        )?);
+
         let handler = Arc::new(FlightHandler::new(processor.clone()));
 
-        let worker_id = Uuid::new_v4().to_string();
         let flight_server = Arc::new(FlightServer::new(
             worker_id.clone(),
             flight_port,
@@ -43,6 +62,8 @@ impl WorkerService {
             processor,
             flight_server,
             coordinator_url,
+            metrics,
+            retry_config,
         })
     }
 

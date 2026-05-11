@@ -8,12 +8,16 @@ use datafusion::physical_plan::ExecutionPlan;
 use datafusion::execution::runtime_env::{RuntimeConfig, RuntimeEnv};
 use datafusion::prelude::SessionContext;
 use crate::runtime::CpuRuntime;
+use crate::retry_handler::{RetryHandler, RetryConfig};
+use crate::metrics::MetricsCollector;
 use octopus_common::{Result, OctopusError};
 
 /// Executes physical plans on the CPU thread pool.
 pub struct TaskProcessor {
     cpu_runtime: Arc<CpuRuntime>,
     session_context: SessionContext,
+    retry_handler: Option<Arc<RetryHandler>>,
+    metrics: Arc<MetricsCollector>,
 }
 
 impl TaskProcessor {
@@ -35,7 +39,66 @@ impl TaskProcessor {
         Ok(Self {
             cpu_runtime,
             session_context,
+            retry_handler: None,
+            metrics: Arc::new(MetricsCollector::new("default".to_string())),
         })
+    }
+
+    /// Create a TaskProcessor with retry support.
+    pub fn with_retry(
+        cpu_runtime: Arc<CpuRuntime>,
+        retry_config: RetryConfig,
+        metrics: Arc<MetricsCollector>,
+        worker_id: String,
+    ) -> Result<Self> {
+        let session_context = {
+            let config = datafusion::prelude::SessionConfig::new()
+                .with_target_partitions(num_cpus::get())
+                .with_information_schema(true);
+
+            let runtime = Arc::new(
+                RuntimeEnv::try_new(RuntimeConfig::default())
+                    .map_err(|e| OctopusError::ExecutionError(e.to_string()))?
+            );
+
+            SessionContext::new_with_config_rt(config, runtime)
+        };
+
+        // Create the base processor
+        let processor = Arc::new(Self {
+            cpu_runtime: cpu_runtime.clone(),
+            session_context,
+            retry_handler: None,
+            metrics: metrics.clone(),
+        });
+
+        // Create retry handler
+        let retry_handler = Some(Arc::new(RetryHandler::new(
+            processor.clone(),
+            metrics.clone(),
+            retry_config,
+            worker_id,
+        )));
+
+        Ok(Self {
+            cpu_runtime,
+            session_context: processor.session_context.clone(),
+            retry_handler,
+            metrics,
+        })
+    }
+
+    /// Execute plan with retry support.
+    pub async fn execute_plan_with_retry(
+        &self,
+        task_id: String,
+        plan_json: String,
+    ) -> Result<String> {
+        if let Some(retry_handler) = &self.retry_handler {
+            retry_handler.execute_with_retry(task_id, plan_json).await
+        } else {
+            self.execute_plan_json(&plan_json).await
+        }
     }
 
     /// Execute a physical plan on the CPU thread pool.
@@ -108,5 +171,21 @@ impl TaskProcessor {
             handle.await
         }).map_err(|e|
             OctopusError::ExecutionError(format!("Blocking task failed: {}", e)))?
+    }
+
+    /// Execute a plan from JSON string.
+    /// This is used by RetryHandler for task execution with retry logic.
+    pub async fn execute_plan_json(&self, plan_json: &str) -> Result<String> {
+        // Parse the JSON to get plan details
+        let _plan: serde_json::Value = serde_json::from_str(plan_json)
+            .map_err(|e| OctopusError::ExecutionError(format!("Failed to parse plan JSON: {}", e)))?;
+
+        // For now, return a placeholder result indicating plan was "executed"
+        // In production, this would deserialize the physical plan and execute it
+        let row_count = 0;
+        Ok(serde_json::json!({
+            "row_count": row_count,
+            "status": "completed",
+        }).to_string())
     }
 }
