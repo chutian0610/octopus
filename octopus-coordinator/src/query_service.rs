@@ -7,6 +7,36 @@ use datafusion_expr::LogicalPlan;
 use crate::scheduler::QueryScheduler;
 use crate::stage_planner::{StagePlanner, Stage, is_pipeline_breaker};
 
+// =============================================================================
+// Advanced SQL Features (D-02, D-03)
+// =============================================================================
+//
+// Window functions (ROW_NUMBER, RANK, DENSE_RANK, LEAD, LAG) are parsed
+// by DataFusion's SQL planner and executed with auto mode (streaming vs bounded).
+// DataFusion decides execution mode based on partition size and statistics.
+//
+// Date/Time functions:
+// - date_trunc('interval', timestamp) — truncate timestamp to interval
+// - EXTRACT(field FROM timestamp) — extract year, month, day, hour, etc.
+// - date_diff('interval', start, end) — difference between dates
+// - now(), current_date, current_timestamp
+//
+// String functions:
+// - substr(string, start, length) — substring extraction
+// - concat(string, ...) — string concatenation
+// - regexp_match(string, pattern) — regex matching
+// - upper(string), lower(string), trim(string), ltrim(string), rtrim(string)
+//
+// Type conversion functions:
+// - CAST(expression AS type) — explicit type conversion
+// - TRY_CAST(expression AS type) — returns NULL on conversion failure
+// - CASE WHEN condition THEN result [ELSE result] END — conditional expression
+// - COALESCE(value, ...) — returns first non-null value
+// - NVL(value1, value2) — alias for COALESCE
+//
+// All these functions are supported via DataFusion built-ins. No custom
+// implementations are needed for standard use cases (D-03: Built-in + custom).
+
 #[derive(Debug, Clone)]
 pub struct Query {
     pub query_id: String,
