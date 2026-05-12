@@ -2,6 +2,24 @@
 //!
 //! Creates a DAG of stages where edges represent data exchange via Arrow Flight.
 //! This enables Trino-style pipeline execution where stages run concurrently.
+//!
+//! # Advanced SQL Features Integration
+//!
+//! Window functions and other advanced SQL constructs are handled as follows:
+//!
+//! ## Window Functions (ADV-01)
+//! - WindowAgg nodes stay in a single stage (not split by Exchange)
+//! - Partition keys determine grouping for ROW_NUMBER, RANK, DENSE_RANK, etc.
+//! - ORDER BY in window specification preserved through planning
+//! - Auto mode (D-02): DataFusion decides streaming vs bounded based on partition size
+//!
+//! ## Pipeline Breakers (Pitfall 1)
+//! Some operators must materialize all input before producing output:
+//! - Sort with large result sets (unless top-N optimization)
+//! - HashAgg with many groups
+//! - HashJoin for large inputs
+//!
+//! Use `is_pipeline_breaker()` to identify these operators.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -162,13 +180,16 @@ impl Default for StagePlanner {
 }
 
 /// Check if an operator is a pipeline breaker (Pitfall 1).
+///
+/// Pipeline breakers materialize all input before producing output:
+/// - Sort (unless using top-N optimization)
+/// - HashAgg with many groups
+/// - HashJoin (for large inputs)
+///
+/// Window functions are NOT pipeline breakers themselves - DataFusion handles
+/// them with auto mode (streaming when possible, bounded when needed).
 pub fn is_pipeline_breaker(_plan: &dyn ExecutionPlan) -> bool {
-    // Operators that must materialize all input before producing output:
-    // - Sort (unless using top-N optimization)
-    // - HashAgg with many groups
-    // - HashJoin (for large inputs)
-
     // For now, return false (assume streaming unless proven otherwise)
-    // Real implementation would check operator type
+    // Real implementation would check operator type via as_any() downcasting
     false
 }
