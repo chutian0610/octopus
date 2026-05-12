@@ -84,7 +84,17 @@ Plans:
   3. User can use window functions (ROW_NUMBER, RANK, DENSE_RANK, LEAD, LAG) with frames
   4. User can use date/time functions (date_trunc, EXTRACT, date_diff) and string functions (SUBSTR, CONCAT, REGEXP)
   5. User can use type conversion functions (CAST, TRY_CAST) and CASE/COALESCE/NVL expressions
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+**Wave 1**
+- [ ] 04-01-PLAN.md — Federated connector foundation (traits, type mapping, connection pool)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 04-02-PLAN.md — PostgreSQL federated connector
+- [ ] 04-03-PLAN.md — MySQL federated connector
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 04-04-PLAN.md — Advanced SQL (window functions, date/time, string, type conversion)
 
 ### Phase 5: Observability & Clients
 **Goal**: Full observability with metrics, logging, and client interfaces (JDBC, UDF)
@@ -103,7 +113,7 @@ Plans:
 | 1. Single-Node Foundation | 3/3 | Complete | 2026-05-07 |
 | 2. Coordinator Core | 3/3 | Complete | - |
 | 3. Workers + Arrow Flight | 4/4 | Complete | 2026-05-11 |
-| 4. Advanced SQL & Federated Sources | 0/5 | Not started | - |
+| 4. Advanced SQL & Federated Sources | 0/4 | Not started | - |
 | 5. Observability & Clients | 0/3 | Not started | - |
 
 ---
