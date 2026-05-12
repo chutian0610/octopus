@@ -25,5 +25,15 @@ futures = { workspace = true }
 tonic = "0.12"
 bytes = "1"
 
+# PostgreSQL federated connector
+tokio-postgres = "0.7"
+deadpool-postgres = "0.14"
+postgres-types = "0.2"
+
+# MySQL federated connector
+mysql_async = "0.34"
+deadpool-mysql = "0.14"
+mysql-types = "0.31"
+
 [dev-dependencies]
 tokio-test = "0.4"
