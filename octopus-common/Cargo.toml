@@ -8,3 +8,12 @@ license.workspace = true
 [dependencies]
 thiserror = { workspace = true }
 anyhow = { workspace = true }
+
+# Federated connector - traits only (actual DB drivers in connector crates)
+deadpool = "0.12"
+
+# For connection pool management
+async-trait = { workspace = true }
+
+# Re-export datafusion types for trait definitions
+datafusion = { workspace = true }
