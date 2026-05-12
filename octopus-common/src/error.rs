@@ -19,4 +19,7 @@ pub enum OctopusError {
 
     #[error("Object store error: {0}")]
     ObjectStoreError(String),
+
+    #[error("Connection pool error: {0}")]
+    ConnectionPoolError(String),
 }
