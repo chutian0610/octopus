@@ -17,3 +17,5 @@ async-trait = { workspace = true }
 
 # Re-export datafusion types for trait definitions
 datafusion = { workspace = true }
+datafusion-expr = { workspace = true }
+datafusion-common = { workspace = true }
