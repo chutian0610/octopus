@@ -3,9 +3,10 @@ use tokio::sync::RwLock;
 use uuid::Uuid;
 use tracing::info;
 use datafusion::execution::context::SessionContext;
-use datafusion_expr::LogicalPlan;
+use datafusion_expr::{LogicalPlan, ScalarUDF};
 use crate::scheduler::QueryScheduler;
 use crate::stage_planner::{StagePlanner, Stage, is_pipeline_breaker};
+use octopus_common::udf::{UdfRegistry, UdfRegistryImpl};
 
 // =============================================================================
 // Advanced SQL Features (D-02, D-03)
@@ -71,6 +72,7 @@ pub struct QueryService {
     context: SessionContext,
     scheduler: Arc<RwLock<QueryScheduler>>,
     queries: Arc<RwLock<std::collections::HashMap<String, Query>>>,
+    udf_registry: Arc<RwLock<UdfRegistryImpl>>,
 }
 
 impl QueryService {
@@ -80,6 +82,7 @@ impl QueryService {
             context,
             scheduler,
             queries: Arc::new(RwLock::new(std::collections::HashMap::new())),
+            udf_registry: Arc::new(RwLock::new(UdfRegistryImpl::new())),
         }
     }
 
@@ -181,5 +184,20 @@ impl QueryService {
 
         info!("Generated EXPLAIN plan for query: {}", sql);
         Ok(explanation)
+    }
+
+    /// Register a scalar UDF with the given name and function
+    pub async fn register_udf(&self, name: &str, func: ScalarUDF) -> Result<(), String> {
+        let registry = self.udf_registry.write().await;
+        registry
+            .register_scalar(name, func)
+            .await
+            .map_err(|e| format!("Failed to register UDF: {}", e))
+    }
+
+    /// List all registered UDFs
+    pub async fn list_udfs(&self) -> Vec<(String, String)> {
+        let registry = self.udf_registry.read().await;
+        registry.list_functions()
     }
 }
