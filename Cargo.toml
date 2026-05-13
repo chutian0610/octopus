@@ -1,10 +1,11 @@
 [workspace]
-members = ["octopus-common", "octopus-executor", "octopus-cli", "octopus-worker", "octopus-coordinator"]
+members = ["octopus-common", "octopus-executor", "octopus-cli", "octopus-worker", "octopus-coordinator", "octopus-jdbc"]
 resolver = "2"
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.75"
 authors = ["Octopus Team"]
 license = "Apache-2.0"
 
