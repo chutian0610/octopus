@@ -104,7 +104,10 @@ Plans:
   1. User can use UDF/UDTF for custom transformations
   2. System emits metrics (CPU, memory, rows processed per stage)
   3. User can use JDBC driver to connect from BI tools
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 05-01-PLAN.md — UDF/UDTF registration and execution
+- [ ] 05-02-PLAN.md — JDBC driver for BI tool connectivity
 
 ## Progress
 
@@ -114,7 +117,7 @@ Plans:
 | 2. Coordinator Core | 3/3 | Complete | - |
 | 3. Workers + Arrow Flight | 4/4 | Complete | 2026-05-11 |
 | 4. Advanced SQL & Federated Sources | 0/4 | Not started | - |
-| 5. Observability & Clients | 0/3 | Not started | - |
+| 5. Observability & Clients | 0/2 | Not started | - |
 
 ---
 
