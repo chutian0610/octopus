@@ -22,10 +22,8 @@
 //! ```
 
 use async_trait::async_trait;
-use datafusion::arrow::array::StringArray;
 use datafusion::arrow::datatypes::DataType;
 use datafusion::physical_plan::ColumnarValue;
-use datafusion::scalar::ScalarValue;
 use datafusion_expr::{create_udf, ScalarUDF, Volatility};
 use std::sync::Arc;
 
@@ -131,6 +129,8 @@ pub fn create_simple_udf(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use datafusion::arrow::array::{StringArray, AsArray};
+    use datafusion::scalar::ScalarValue;
 
     #[tokio::test]
     async fn test_registry_operations() {
@@ -140,7 +140,7 @@ mod tests {
         assert_eq!(registry.scalar_count(), 0);
         assert!(registry.list_functions().is_empty());
 
-        // to_upper example UDF
+        // to_upper example UDF - handles only Array input
         let to_upper = create_simple_udf(
             "to_upper",
             vec![DataType::Utf8],
@@ -156,14 +156,9 @@ mod tests {
                             .collect();
                         Ok(ColumnarValue::Array(Arc::new(result)))
                     }
-                    ColumnarValue::Scalar(s) => {
-                        if let Some(s) = s.as_string_view().iter().next() {
-                            Ok(ColumnarValue::Scalar(ScalarValue::Utf8(
-                                Some(s.to_uppercase())
-                            )))
-                        } else {
-                            Ok(ColumnarValue::Scalar(ScalarValue::Utf8(None)))
-                        }
+                    ColumnarValue::Scalar(_) => {
+                        // Return null for scalar input (simplified for testing)
+                        Ok(ColumnarValue::Scalar(ScalarValue::Utf8(None)))
                     }
                 }
             }),
